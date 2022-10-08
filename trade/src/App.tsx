@@ -26,8 +26,8 @@ ChartJS.register(
 
 type lineProps = React.ComponentProps<typeof Line>
 
-// const net = new NeuralNetwork();
-const net = new NeuralNetworkGPU();
+const net = new NeuralNetwork();
+// const net = new NeuralNetworkGPU();
 
 function App() {
   const [ready, setReady] = useState(false);
@@ -96,7 +96,7 @@ function App() {
     const trainingData: any = [];
 
     // for (let i = 0; cursor < 4048620; i++) {
-    for (let i = 0; cursor < MIN_CURSOR + 100000; i++) {
+    for (let i = 0; cursor < MIN_CURSOR + 200000; i++) {
       const res = search(cursor);
       final.push(res.cursorRes)
 

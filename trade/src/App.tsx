@@ -36,42 +36,6 @@ function App() {
   const search = (cursor: number) => {
     const res = engine.current!.funcs.getSituation(cursor);
     return res;
-
-    // setCursorR(`${cursor.current} / ${engine.current!.data.byteLength / LINE_SIZE}`);
-    // const points = Array.from(engine.current!.data.slice(cursor.current!, cursor.current! + 100))
-
-    // const finalBefore = [];
-    // const finalAfter = [];
-    // const final = [];
-    // const bg = [];
-    // for (let i = res.cursorRes - 50; i < res.cursorRes + 50; i++) {
-    //   const line = engine.current!.getLine(i);
-    //   if (i <= res.cursorRes) {
-    //     finalBefore.push(line.close);
-    //   } else {
-    //     finalAfter.push(line.close);
-    //   }
-    //   final.push(line.close)
-    //   if (i >= res.cursorRes && i <= res.cursorRes + 5) {
-    //     bg.push("red")
-    //   } else {
-    //     bg.push("blue");
-    //   }
-    // }
-
-    // for (let i = res.cursorRes; i <= res.cursorRes + 50; i++) {
-    //   const line = engine.current!.getLine(i);
-    //   final.push(line.close);
-    // }
-    // return {
-    //   finalBefore,
-    //   finalAfter,
-    //   final,
-    //   bg,
-    //   cursor: res.cursorRes,
-    // }
-    // cursor.current = res.cursorRes + 1;
-    // setCursorR(`${cursor.current!}`);
   }
 
   const printGraph = (cursor: number) => {

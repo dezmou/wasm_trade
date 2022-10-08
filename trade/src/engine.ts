@@ -2,6 +2,7 @@ export const LINE_SIZE = 6;
 export const SITUATION_SIZE = 100;
 export const SITUATION_AMOUNT = 4;
 export const SITUATION_STEP = 5;
+export const MIN_CURSOR = 1_000_000
 
 interface Abi {
     getSituation: (

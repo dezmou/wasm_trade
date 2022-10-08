@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import logo from './logo.svg';
-import { init, LINE_SIZE } from "./engine"
+import { init, LINE_SIZE, MIN_CURSOR } from "./engine"
 // import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -31,60 +31,99 @@ function App() {
   const [ready, setReady] = useState(false);
   const [graph1, setGraph1] = useState<lineProps["data"] | null>(null)
   const engine = useRef<Awaited<ReturnType<typeof init>> | null>(null)
-  const cursor = useRef(500000);
-  const [cursorR, setCursorR] = useState("5000");
+  const cursorRef = useRef(MIN_CURSOR);
 
-  const search = () => {
-    const res = engine.current!.funcs.getSituation(cursor.current);
+  const search = (cursor: number) => {
+    const res = engine.current!.funcs.getSituation(cursor);
+    return res;
 
     // setCursorR(`${cursor.current} / ${engine.current!.data.byteLength / LINE_SIZE}`);
-    if (res.cursorRes !== -1) {
-      // const points = Array.from(engine.current!.data.slice(cursor.current!, cursor.current! + 100))
+    // const points = Array.from(engine.current!.data.slice(cursor.current!, cursor.current! + 100))
 
-      const final = [];
-      const bg = [];
-      for (let i = res.cursorRes - 50; i < res.cursorRes + 50; i++) {
-        const line = engine.current!.getLine(i);
-        final.push(line.close);
-        if (i >= res.cursorRes && i <= res.cursorRes + 5) {
-          bg.push("red")
-        } else {
-          bg.push("blue");
-        }
+    // const finalBefore = [];
+    // const finalAfter = [];
+    // const final = [];
+    // const bg = [];
+    // for (let i = res.cursorRes - 50; i < res.cursorRes + 50; i++) {
+    //   const line = engine.current!.getLine(i);
+    //   if (i <= res.cursorRes) {
+    //     finalBefore.push(line.close);
+    //   } else {
+    //     finalAfter.push(line.close);
+    //   }
+    //   final.push(line.close)
+    //   if (i >= res.cursorRes && i <= res.cursorRes + 5) {
+    //     bg.push("red")
+    //   } else {
+    //     bg.push("blue");
+    //   }
+    // }
+
+    // for (let i = res.cursorRes; i <= res.cursorRes + 50; i++) {
+    //   const line = engine.current!.getLine(i);
+    //   final.push(line.close);
+    // }
+    // return {
+    //   finalBefore,
+    //   finalAfter,
+    //   final,
+    //   bg,
+    //   cursor: res.cursorRes,
+    // }
+    // cursor.current = res.cursorRes + 1;
+    // setCursorR(`${cursor.current!}`);
+  }
+
+  const printGraph = (cursor: number) => {
+    const finalBefore = [];
+    const finalAfter = [];
+    const final = [];
+    const bg = [];
+    for (let i = cursor - 50; i < cursor + 50; i++) {
+      const line = engine.current!.getLine(i);
+      if (i <= cursor) {
+        finalBefore.push(line.close);
+      } else {
+        finalAfter.push(line.close);
       }
-
-      // for (let i = res.cursorRes; i <= res.cursorRes + 50; i++) {
-      //   const line = engine.current!.getLine(i);
-      //   final.push(line.close);
-      // }
-      setGraph1({
-        labels: final.map((e, i) => i),
-        datasets: [
-          {
-            label: "open",
-            data: final,
-            fill: true,
-            backgroundColor: bg,
-            borderColor: bg,
-            animation: false
-          },
-        ]
-      })
-    } else {
-
+      final.push(line.close)
+      if (i >= cursor && i <= cursor + 5) {
+        bg.push("red")
+      } else {
+        bg.push("blue");
+      }
     }
-    cursor.current = res.cursorRes + 1;
-    setCursorR(`${cursor.current!}`);
+
+    setGraph1({
+      labels: final.map((e, i) => i),
+      datasets: [
+        {
+          label: "open",
+          data: final,
+          // fill: true,
+          backgroundColor: bg,
+          borderColor: bg,
+          animation: false
+        },
+      ]
+    })
   }
 
   const SearchLot = async () => {
-    let found = 0;
-    while (true) {
-      search()
-      found += 1;
-      console.log(found);
-      await new Promise(r => setTimeout(r, 0));
+    let cursor = MIN_CURSOR;
+    const final = [];
+    console.log(engine.current!.getLine(cursor));
+    for (let i = 0; cursor < 4048620; i++) {
+      const res = search(cursor);
+      final.push(res.cursorRes)
+      cursor = res.cursorRes + 3;
+      console.log(cursor);
+      // printGraph(res.cursorRes)
+      // await new Promise(r => setTimeout(r, 0));
     }
+    console.log(engine.current!.getLine(cursor));
+    console.log(final.length);
+    console.log(final);
   }
 
   useEffect(() => {
@@ -96,10 +135,14 @@ function App() {
 
   return <>
     {ready && <div>
-      <button onClick={search}>Search next</button>
+      <button onClick={() => {
+        const res = search(cursorRef.current);
+        console.log(res);
+        cursorRef.current = res.cursorRes + 6;
+        printGraph(res.cursorRes);
+      }}>Search next</button>
       <button onClick={SearchLot}>Search a lot</button>
       {graph1 && <Line data={graph1!}></Line>}
-      {cursorR}
 
     </div>}
   </>

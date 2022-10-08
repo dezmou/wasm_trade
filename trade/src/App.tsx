@@ -31,7 +31,7 @@ function App() {
   const [ready, setReady] = useState(false);
   const [graph1, setGraph1] = useState<lineProps["data"] | null>(null)
   const engine = useRef<Awaited<ReturnType<typeof init>> | null>(null)
-  const cursor = useRef(50000);
+  const cursor = useRef(500000);
   const [cursorR, setCursorR] = useState("5000");
 
   const search = () => {
@@ -42,13 +42,18 @@ function App() {
       // const points = Array.from(engine.current!.data.slice(cursor.current!, cursor.current! + 100))
 
       const final = [];
-      for (let i = res.cursorRes; i < res.cursorRes + 100; i++) {
+      for (let i = res.cursorRes - 50; i < res.cursorRes; i++) {
+        const line = engine.current!.getLine(i);
+        final.push(line.close);
+      }
+
+      for (let i = res.cursorRes; i <= res.cursorRes + 50; i++) {
         const line = engine.current!.getLine(i);
         final.push(line.close);
       }
 
       setGraph1({
-        labels: final,
+        labels: final.map((e, i) => i),
         datasets: [
           {
             label: "open",
@@ -60,25 +65,34 @@ function App() {
           },
         ]
       })
+    } else {
+
     }
-    cursor.current = res.cursorRes + 1;
+    cursor.current = res.cursorRes + 5;
     setCursorR(`${cursor.current!}`);
+  }
+
+  const SearchLot = async () => {
+    let found = 0;
+    while (true) {
+      search()
+      found += 1;
+      console.log(found);
+      await new Promise(r => setTimeout(r, 0));
+    }
   }
 
   useEffect(() => {
     ; (async () => {
       engine.current = await init();
       setReady(true);
-      // while(true){
-      //   search()
-      //   await new Promise(r => setTimeout(r, 10));
-      // }
     })()
   }, [])
 
   return <>
     {ready && <div>
       <button onClick={search}>Search next</button>
+      <button onClick={SearchLot}>Search a lot</button>
       {graph1 && <Line data={graph1!}></Line>}
       {cursorR}
 

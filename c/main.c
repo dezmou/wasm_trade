@@ -21,8 +21,10 @@ typedef struct  misc {
 void getSituation(Data *data, Result *res, Misc * misc, int cursor, int situationSize) {
     int max = 0;
     int min = 999999;
+    int initial = data[cursor].close;
     for (int i=0; i< situationSize; i++){
-        res[i].close =  (int)((data[cursor + i].close / data[cursor + i + 1].close * 10000));
+        // res[i].close =  (int)((data[cursor + i].close / data[cursor + i + 1].close * 10000));
+        res[i].close =  (int)((initial / data[cursor + i + 1].close * 10000));
         if (res[i].close < min) {
             min = res[i].close;
         }

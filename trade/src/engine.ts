@@ -1,7 +1,7 @@
-const LINE_SIZE = 4 * 6;
-const SITUATION_SIZE = 100;
-const SITUATION_AMOUNT = 4;
-const SITUATION_STEP = 5;
+export const LINE_SIZE = 4 * 6;
+export const SITUATION_SIZE = 100;
+export const SITUATION_AMOUNT = 4;
+export const SITUATION_STEP = 5;
 
 interface Abi {
     getSituation: (
@@ -47,7 +47,7 @@ export const init = async () => {
         return (instance.exports as any) as Abi
     }
     const funcs = await loadAsm("./main.wasm");
-    
+
     const getSituation = (cursor: number) => {
         funcs.getSituation(0, ptr_result, ptr_misc, cursor, SITUATION_SIZE)
         return {
@@ -58,6 +58,7 @@ export const init = async () => {
     }
 
     return {
+        data,
         funcs: {
             getSituation
         },

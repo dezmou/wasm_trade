@@ -12,6 +12,7 @@ import {
   Legend,
 } from 'chart.js'
 import { Line } from 'react-chartjs-2'
+import { recurrent, NeuralNetwork } from "brain.js"
 
 ChartJS.register(
   CategoryScale,
@@ -77,23 +78,39 @@ function App() {
   const SearchLot = async () => {
     let cursor = MIN_CURSOR;
     const final = [];
-    
-    const trainingData = [];
 
-    for (let i = 0; cursor < 4048620; i++) {
+    const trainingData: any = [];
+
+    // for (let i = 0; cursor < 4048620; i++) {
+    for (let i = 0; cursor < MIN_CURSOR + 100000; i++) {
       const res = search(cursor);
       final.push(res.cursorRes)
-      
+
       const perc = engine.current!.funcs.getPumpPercent(res.cursorRes);
       trainingData.push({
-        input : Array.from(perc.situationResult.subarray(0,45)),
-        output : perc.isWin
+        input:  Array.from(perc.situationResult.subarray(0, 45)),
+        output: {isWin : perc.isWin}
       })
       cursor = res.cursorRes + 1;
       // printGraph(res.cursorRes)
       // await new Promise(r => setTimeout(r, 0));
     }
-    console.log(trainingData);
+    console.log({trainingData});
+
+    const net = new NeuralNetwork();
+    net.train(trainingData);
+
+    for (let i = 0; cursor < MIN_CURSOR + 200000; i++) {
+      const res = search(cursor);
+
+      const perc = engine.current!.funcs.getPumpPercent(res.cursorRes);
+      console.log(Array.from(perc.situationResult.subarray(0, 45)));
+      const resBrain = net.run(Array.from(perc.situationResult.subarray(0, 45)))
+      console.log(resBrain);
+      break;
+      cursor = res.cursorRes + 1;
+    }
+
   }
 
   useEffect(() => {

@@ -14,8 +14,8 @@ interface Abi {
 }
 
 const misc = {
-    resMin: 0,
     resMax: 0,
+    resMin: 0,
 }
 
 export const init = async () => {
@@ -47,12 +47,13 @@ export const init = async () => {
         return (instance.exports as any) as Abi
     }
     const funcs = await loadAsm("./main.wasm");
+    
     const getSituation = (cursor: number) => {
         funcs.getSituation(0, ptr_result, ptr_misc, cursor, SITUATION_SIZE)
         return {
             sit: situationResult,
-            min: miscResult[0],
-            max: miscResult[1],
+            max: miscResult[0],
+            min: miscResult[1],
         }
     }
 

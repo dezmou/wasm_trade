@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import logo from './logo.svg';
 import { init, LINE_SIZE, MIN_CURSOR } from "./engine"
-// import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -23,7 +22,6 @@ ChartJS.register(
   Tooltip,
   Legend
 )
-declare const Chart: any
 
 type lineProps = React.ComponentProps<typeof Line>
 
@@ -34,7 +32,7 @@ function App() {
   const cursorRef = useRef(MIN_CURSOR);
 
   const search = (cursor: number) => {
-    const res = engine.current!.funcs.getSituation(cursor);
+    const res = engine.current!.funcs.searchPump(cursor);
     return res;
   }
 
@@ -43,21 +41,25 @@ function App() {
     const finalAfter = [];
     const final = [];
     const bg = [];
-    for (let i = cursor - 50; i < cursor + 50; i++) {
-      const line = engine.current!.getLine(i);
+    const perc = engine.current!.funcs.getPumpPercent(cursor);
+    console.log(perc);
+
+    // for (let i = cursor - 50; i < cursor + 50; i++) {
+    for (let i = 0; i < 100; i++) {
+      // const line = engine.current!.getLine(i);
       if (i <= cursor) {
-        finalBefore.push(line.close);
+        finalBefore.push(perc.at(i));
       } else {
-        finalAfter.push(line.close);
+        finalAfter.push(perc.at(i));
       }
-      final.push(line.close)
-      if (i >= cursor && i <= cursor + 5) {
+      final.push(perc.at(i))
+      if (i >= 50 && i <= 50 + 5) {
         bg.push("red")
       } else {
         bg.push("blue");
       }
     }
-
+    console.log(final);
     setGraph1({
       labels: final.map((e, i) => i),
       datasets: [
@@ -76,12 +78,11 @@ function App() {
   const SearchLot = async () => {
     let cursor = MIN_CURSOR;
     const final = [];
-    console.log(engine.current!.getLine(cursor));
     for (let i = 0; cursor < 4048620; i++) {
       const res = search(cursor);
       final.push(res.cursorRes)
-      cursor = res.cursorRes + 3;
-      console.log(cursor);
+      cursor = res.cursorRes + 1;
+      // console.log(cursor);
       // printGraph(res.cursorRes)
       // await new Promise(r => setTimeout(r, 0));
     }
@@ -101,8 +102,7 @@ function App() {
     {ready && <div>
       <button onClick={() => {
         const res = search(cursorRef.current);
-        console.log(res);
-        cursorRef.current = res.cursorRes + 6;
+        cursorRef.current = res.cursorRes + 1;
         printGraph(res.cursorRes);
       }}>Search next</button>
       <button onClick={SearchLot}>Search a lot</button>

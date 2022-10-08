@@ -18,20 +18,12 @@ typedef struct  misc {
     int min;
 } Misc;
 
-void getSituation(Data *data, Result *res, Misc * misc, int cursor, int situationSize) {
-    int max = 0;
-    int min = 999999;
-    int initial = data[cursor].close;
-    for (int i=0; i< situationSize; i++){
-        // res[i].close =  (int)((data[cursor + i].close / data[cursor + i + 1].close * 10000));
-        res[i].close =  (int)((initial / data[cursor + i + 1].close * 10000));
-        if (res[i].close < min) {
-            min = res[i].close;
+int getSituation(Data *data, Result *res, Misc * misc, int cursor) {
+    for (int i=0; i< 1000; i++){
+        res[i].close =  (int)((data[cursor + i].close / data[cursor + i + 5].close * 10000));
+        if (res[i].close > 10100){
+            return cursor + i;
         }
-        if (res[i].close > max) {
-            max = res[i].close;
-        }
-        misc->min = min;
-        misc->max = max;
     }
+    return -1;
 }

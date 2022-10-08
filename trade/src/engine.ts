@@ -9,8 +9,8 @@ interface Abi {
         memRresult: number,
         misc: number,
         cursor: number,
-        situationSize: number
-    ) => void
+        // situationSize: number
+    ) => number
 }
 
 const misc = {
@@ -32,8 +32,10 @@ export const init = async () => {
     const ptr_result = data.byteLength;
     const ptr_misc = data.byteLength + (SITUATION_SIZE * 4);
 
+    const dataArray = new Int32Array(memory.buffer, 0, data.byteLength / 4);
+    const dataArrayFloat = new Float32Array(memory.buffer, 0, data.byteLength / 4);
     const situationResult = new Int32Array(memory.buffer, data.byteLength, (SITUATION_SIZE));
-    const miscResult = new Int32Array(memory.buffer, data.byteLength + (SITUATION_SIZE));
+    const miscResult = new Int32Array(memory.buffer, data.byteLength + (SITUATION_SIZE), (Object.keys(misc).length));
 
     // Load asm
     const loadAsm = async (scriptSrc: string) => {
@@ -49,8 +51,9 @@ export const init = async () => {
     const funcs = await loadAsm("./main.wasm");
 
     const getSituation = (cursor: number) => {
-        funcs.getSituation(0, ptr_result, ptr_misc, cursor, SITUATION_SIZE)
+        const res = funcs.getSituation(0, ptr_result, ptr_misc, cursor)
         return {
+            cursorRes: res,
             sit: situationResult,
             max: miscResult[0],
             min: miscResult[1],
@@ -58,7 +61,18 @@ export const init = async () => {
     }
 
     return {
-        data,
+        data: dataArray,
+        getLine: (cursor: number) => {
+            
+            return {
+                time: dataArray[cursor * LINE_SIZE],
+                open: dataArrayFloat[cursor * LINE_SIZE + 1],
+                high: dataArrayFloat[cursor * LINE_SIZE + 2],
+                low: dataArrayFloat[cursor * LINE_SIZE + 3],
+                close: dataArrayFloat[cursor * LINE_SIZE + 4],
+                volume: dataArrayFloat[cursor * LINE_SIZE + 5],
+            }
+        },
         funcs: {
             getSituation
         },

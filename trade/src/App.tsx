@@ -1,8 +1,12 @@
 import React, { useEffect } from 'react';
 import logo from './logo.svg';
 
+const LINE_SIZE = 4 * 6;
+const SITUATION_NBR = 4;
+const SITUATION_SIZE = 100;
+
 interface Abi {
-  chien: (mem: number, cursor: number) => number
+  getSituation: (memData: number, memRresult: number, cursor: number) => void
 }
 
 function App() {
@@ -10,14 +14,17 @@ function App() {
     ; (async () => {
       const data = await (await (await fetch("./bin/btc_tohlcv")).blob()).arrayBuffer()
 
-
       // Set memory
       const memory = new WebAssembly.Memory({
-        initial: (data.byteLength / 64000)
+        initial: (data.byteLength / 64000) + (LINE_SIZE * SITUATION_SIZE * SITUATION_NBR)
       });
-      const chien = new Uint8ClampedArray(memory.buffer, 0, data.byteLength)
-      const chien2 = new Uint8ClampedArray(data, 0, data.byteLength)
-      chien.set(chien2, 0)
+      (new Uint8ClampedArray(memory.buffer, 0, data.byteLength))
+        .set(new Uint8ClampedArray(data, 0, data.byteLength), 0)
+
+      const ptr_data = 0;
+      const ptr_result = data.byteLength;
+
+      const result = new Uint32Array(memory.buffer, data.byteLength);
 
       // Load asm
       const loadAsm = async (scriptSrc: string) => {
@@ -32,8 +39,10 @@ function App() {
       }
       const funcs = await loadAsm("./main.wasm")
 
-      const res = funcs.chien(0, 1)
-      console.log(res);
+      console.log(result.at(0));
+      const res = funcs.getSituation(0, ptr_result, 5000)
+      console.log(result.at(0));
+
     })()
   }, [])
 

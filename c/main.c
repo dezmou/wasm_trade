@@ -1,5 +1,3 @@
-#include <stdio.h>
-
 typedef struct  data {
     int time;
     float open;
@@ -9,6 +7,6 @@ typedef struct  data {
     float volume;
 } Data;
 
-float chien(Data *data, int cursor){
-    return data[cursor].open;
+void getSituation(Data *data, int *res, int cursor) {
+    res[0] = 55;
 }

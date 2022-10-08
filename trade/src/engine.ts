@@ -1,4 +1,4 @@
-export const LINE_SIZE = 4 * 6;
+export const LINE_SIZE = 6;
 export const SITUATION_SIZE = 100;
 export const SITUATION_AMOUNT = 4;
 export const SITUATION_STEP = 5;
@@ -63,7 +63,7 @@ export const init = async () => {
     return {
         data: dataArray,
         getLine: (cursor: number) => {
-            
+
             return {
                 time: dataArray[cursor * LINE_SIZE],
                 open: dataArrayFloat[cursor * LINE_SIZE + 1],

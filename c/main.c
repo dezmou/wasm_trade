@@ -1,5 +1,3 @@
-// #include <stdlib.h>
-
 typedef struct  data {
     int time;
     float open;

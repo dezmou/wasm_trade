@@ -31,7 +31,7 @@ function App() {
   const [ready, setReady] = useState(false);
   const [graph1, setGraph1] = useState<lineProps["data"] | null>(null)
   const engine = useRef<Awaited<ReturnType<typeof init>> | null>(null)
-  const cursor = useRef(5000);
+  const cursor = useRef(50000);
   const [cursorR, setCursorR] = useState("5000");
 
   const search = () => {
@@ -42,9 +42,13 @@ function App() {
     // setCursorR(`${cursor.current} / ${engine.current!.data.byteLength / LINE_SIZE}`);
     if (res.cursorRes !== -1) {
       // const points = Array.from(engine.current!.data.slice(cursor.current!, cursor.current! + 100))
-      const line = engine.current!.getLine(res.cursorRes);
-      console.log(line);
-      
+
+      const final = [];
+      for (let i = 0; i < 50; i++) {
+        const line = engine.current!.getLine(i);
+        console.log(line);
+      }
+
       return;
       // setGraph1({
       //   labels: points,

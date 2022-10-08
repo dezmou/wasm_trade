@@ -12,7 +12,7 @@ import {
   Legend,
 } from 'chart.js'
 import { Line } from 'react-chartjs-2'
-import { recurrent, NeuralNetwork } from "brain.js"
+import { recurrent, NeuralNetwork, NeuralNetworkGPU } from "brain.js"
 
 ChartJS.register(
   CategoryScale,
@@ -26,11 +26,16 @@ ChartJS.register(
 
 type lineProps = React.ComponentProps<typeof Line>
 
+// const net = new NeuralNetwork();
+const net = new NeuralNetworkGPU();
+
 function App() {
   const [ready, setReady] = useState(false);
   const [graph1, setGraph1] = useState<lineProps["data"] | null>(null)
   const engine = useRef<Awaited<ReturnType<typeof init>> | null>(null)
   const cursorRef = useRef(MIN_CURSOR);
+
+  const testCursor = useRef(0);
 
   const search = (cursor: number) => {
     const res = engine.current!.funcs.searchPump(cursor);
@@ -43,7 +48,6 @@ function App() {
     const final = [];
     const bg = [];
     const perc = engine.current!.funcs.getPumpPercent(cursor).situationResult;
-    console.log(perc);
 
     // for (let i = cursor - 50; i < cursor + 50; i++) {
     for (let i = 0; i < 100; i++) {
@@ -75,7 +79,17 @@ function App() {
     })
   }
 
-  const SearchLot = async () => {
+  const checkNext = () => {
+      const res = search(testCursor.current);
+      const perc = engine.current!.funcs.getPumpPercent(res.cursorRes);
+      const resBrain = net.run(Array.from(perc.situationResult.subarray(0, 45)))
+      console.log(resBrain);
+      testCursor.current = res.cursorRes + 1;
+      printGraph(testCursor.current);
+      testCursor.current += 1;
+  }
+
+  const searchLot = async () => {
     let cursor = MIN_CURSOR;
     const final = [];
 
@@ -88,29 +102,16 @@ function App() {
 
       const perc = engine.current!.funcs.getPumpPercent(res.cursorRes);
       trainingData.push({
-        input:  Array.from(perc.situationResult.subarray(0, 45)),
-        output: {isWin : perc.isWin}
+        input: Array.from(perc.situationResult.subarray(0, 45)),
+        output: { isWin: perc.isWin }
       })
       cursor = res.cursorRes + 1;
       // printGraph(res.cursorRes)
       // await new Promise(r => setTimeout(r, 0));
     }
-    console.log({trainingData});
-
-    const net = new NeuralNetwork();
     net.train(trainingData);
-
-    for (let i = 0; cursor < MIN_CURSOR + 200000; i++) {
-      const res = search(cursor);
-
-      const perc = engine.current!.funcs.getPumpPercent(res.cursorRes);
-      console.log(Array.from(perc.situationResult.subarray(0, 45)));
-      const resBrain = net.run(Array.from(perc.situationResult.subarray(0, 45)))
-      console.log(resBrain);
-      break;
-      cursor = res.cursorRes + 1;
-    }
-
+    testCursor.current = cursor;
+    console.log("DONE");
   }
 
   useEffect(() => {
@@ -124,10 +125,13 @@ function App() {
     {ready && <div>
       <button onClick={() => {
         const res = search(cursorRef.current);
+        const perc = engine.current!.funcs.getPumpPercent(res.cursorRes);
+        console.log(perc.isWin);
         cursorRef.current = res.cursorRes + 1;
         printGraph(res.cursorRes);
       }}>Search next</button>
-      <button onClick={SearchLot}>Search a lot</button>
+      <button onClick={searchLot}>train</button>
+      <button onClick={checkNext}>check next</button>
       {graph1 && <Line data={graph1!}></Line>}
 
     </div>}

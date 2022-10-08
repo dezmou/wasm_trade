@@ -21,7 +21,7 @@ void getPumpPercent(Data *data, Result *res, Misc * misc, int cursor){
     for (int i=0; i<100;i++){
         res[i].close =  (int)(10000 - (initial / data[cursor + i - 50].close * 10000));
     }
-    misc->isWin = res[50].close > res[70].close ? 1 : 0;
+    misc->isWin = data[cursor].close > data[cursor + 20].close ? 1 : 0;
 }
 
 int searchPump(Data *data, Result *res, Misc * misc, int cursor) {

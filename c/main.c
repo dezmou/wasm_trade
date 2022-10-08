@@ -17,9 +17,9 @@ typedef struct  misc {
 } Misc;
 
 int getSituation(Data *data, Result *res, Misc * misc, int cursor) {
-    for (int i=0; i< 1000; i++){
-        res[i].close =  (int)((data[cursor + i].close / data[cursor + i + 5].close * 10000));
-        if (res[i].close > 10100){
+    for (int i=0; i< 100000; i++){
+        int move = (int)(10000 - (data[cursor + i].close / data[cursor + i + 5].close * 10000));
+        if (move > 300){
             return cursor + i;
         }
     }

@@ -63,7 +63,6 @@ export const init = async () => {
     return {
         data: dataArray,
         getLine: (cursor: number) => {
-
             return {
                 time: dataArray[cursor * LINE_SIZE],
                 open: dataArrayFloat[cursor * LINE_SIZE + 1],

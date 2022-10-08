@@ -35,36 +35,34 @@ function App() {
   const [cursorR, setCursorR] = useState("5000");
 
   const search = () => {
-    console.log("LAUNCH");
     const res = engine.current!.funcs.getSituation(cursor.current);
-    console.log("DONE");
 
     // setCursorR(`${cursor.current} / ${engine.current!.data.byteLength / LINE_SIZE}`);
     if (res.cursorRes !== -1) {
       // const points = Array.from(engine.current!.data.slice(cursor.current!, cursor.current! + 100))
 
       const final = [];
-      for (let i = 0; i < 50; i++) {
+      for (let i = res.cursorRes; i < res.cursorRes + 100; i++) {
         const line = engine.current!.getLine(i);
-        console.log(line);
+        final.push(line.close);
       }
 
-      return;
-      // setGraph1({
-      //   labels: points,
-      //   datasets: [
-      //     {
-      //       label: "open",
-      //       data: points,
-      //       fill: true,
-      //       backgroundColor: "rgba(75,192,192,0.2)",
-      //       borderColor: "rgba(75,192,192,1)",
-      //       animation: false
-      //     },
-      //   ]
-      // })
+      setGraph1({
+        labels: final,
+        datasets: [
+          {
+            label: "open",
+            data: final,
+            fill: true,
+            backgroundColor: "rgba(75,192,192,0.2)",
+            borderColor: "rgba(75,192,192,1)",
+            animation: false
+          },
+        ]
+      })
     }
     cursor.current = res.cursorRes + 1;
+    setCursorR(`${cursor.current!}`);
   }
 
   useEffect(() => {

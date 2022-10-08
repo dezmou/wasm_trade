@@ -41,7 +41,7 @@ function App() {
     const finalAfter = [];
     const final = [];
     const bg = [];
-    const perc = engine.current!.funcs.getPumpPercent(cursor);
+    const perc = engine.current!.funcs.getPumpPercent(cursor).situationResult;
     console.log(perc);
 
     // for (let i = cursor - 50; i < cursor + 50; i++) {
@@ -53,13 +53,12 @@ function App() {
         finalAfter.push(perc.at(i));
       }
       final.push(perc.at(i))
-      if (i >= 50 && i <= 50 + 5) {
+      if (i >= 45 && i <= 50) {
         bg.push("red")
       } else {
         bg.push("blue");
       }
     }
-    console.log(final);
     setGraph1({
       labels: final.map((e, i) => i),
       datasets: [
@@ -78,17 +77,23 @@ function App() {
   const SearchLot = async () => {
     let cursor = MIN_CURSOR;
     const final = [];
+    
+    const trainingData = [];
+
     for (let i = 0; cursor < 4048620; i++) {
       const res = search(cursor);
       final.push(res.cursorRes)
+      
+      const perc = engine.current!.funcs.getPumpPercent(res.cursorRes);
+      trainingData.push({
+        input : Array.from(perc.situationResult.subarray(0,45)),
+        output : perc.isWin
+      })
       cursor = res.cursorRes + 1;
-      // console.log(cursor);
       // printGraph(res.cursorRes)
       // await new Promise(r => setTimeout(r, 0));
     }
-    console.log(engine.current!.getLine(cursor));
-    console.log(final.length);
-    console.log(final);
+    console.log(trainingData);
   }
 
   useEffect(() => {

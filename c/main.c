@@ -12,7 +12,7 @@ typedef struct result {
 } Result;
 
 typedef struct  misc {
-    int cursor;
+    int isWin;
     int foundIndex;
 } Misc;
 
@@ -21,11 +21,13 @@ void getPumpPercent(Data *data, Result *res, Misc * misc, int cursor){
     for (int i=0; i<100;i++){
         res[i].close =  (int)(10000 - (initial / data[cursor + i - 50].close * 10000));
     }
+    // misc->isWin = res[50].close > res[70].close ? 1 : 0;
+    misc->isWin = 69;
 }
 
 int searchPump(Data *data, Result *res, Misc * misc, int cursor) {
     for (int i=0; i< 10000000; i++){
-        int move = (int)(10000 - (data[cursor + i].close / data[cursor + i + 5].close * 10000));
+        int move = (int)(10000 - (data[cursor + i - 5].close / data[cursor + i].close * 10000));
         if (move > 110){
             return cursor + i;
         }

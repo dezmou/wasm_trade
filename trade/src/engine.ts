@@ -22,7 +22,7 @@ interface Abi {
 }
 
 const misc = {
-    resMax: 0,
+    isWin: 0,
     resMin: 0,
 }
 const miscLength = (Object.keys(misc).length);
@@ -49,7 +49,7 @@ export const init = async () => {
     const dataArray = new Int32Array(memory.buffer, 0, data.byteLength / SIZE_INT);
     const dataArrayFloat = new Float32Array(memory.buffer, 0, data.byteLength / SIZE_INT);
     const situationResult = new Int32Array(memory.buffer, data.byteLength, (SITUATION_SIZE));
-    const miscResult = new Int32Array(memory.buffer, data.byteLength + (SITUATION_SIZE), miscLength);
+    const miscResult = new Int32Array(memory.buffer, data.byteLength + (SITUATION_SIZE * SIZE_INT), miscLength);
 
     // Load asm
     const loadAsm = async (scriptSrc: string) => {
@@ -66,7 +66,10 @@ export const init = async () => {
 
     const getPumpPercent = (cursor: number) => {
         funcs.getPumpPercent(0, ptr_result, ptr_misc, cursor)
-        return situationResult;
+        return {
+            situationResult,
+            isWin: miscResult.at(0),
+        };
     }
 
     const searchPump = (cursor: number) => {

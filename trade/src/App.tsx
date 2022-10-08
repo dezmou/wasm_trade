@@ -42,16 +42,21 @@ function App() {
       // const points = Array.from(engine.current!.data.slice(cursor.current!, cursor.current! + 100))
 
       const final = [];
-      for (let i = res.cursorRes - 50; i < res.cursorRes; i++) {
+      const bg = [];
+      for (let i = res.cursorRes - 50; i < res.cursorRes + 50; i++) {
         const line = engine.current!.getLine(i);
         final.push(line.close);
+        if (i >= res.cursorRes && i <= res.cursorRes + 5) {
+          bg.push("red")
+        } else {
+          bg.push("blue");
+        }
       }
 
-      for (let i = res.cursorRes; i <= res.cursorRes + 50; i++) {
-        const line = engine.current!.getLine(i);
-        final.push(line.close);
-      }
-
+      // for (let i = res.cursorRes; i <= res.cursorRes + 50; i++) {
+      //   const line = engine.current!.getLine(i);
+      //   final.push(line.close);
+      // }
       setGraph1({
         labels: final.map((e, i) => i),
         datasets: [
@@ -59,8 +64,8 @@ function App() {
             label: "open",
             data: final,
             fill: true,
-            backgroundColor: "rgba(75,192,192,0.2)",
-            borderColor: "rgba(75,192,192,1)",
+            backgroundColor: bg,
+            borderColor: bg,
             animation: false
           },
         ]
@@ -68,7 +73,7 @@ function App() {
     } else {
 
     }
-    cursor.current = res.cursorRes + 5;
+    cursor.current = res.cursorRes + 1;
     setCursorR(`${cursor.current!}`);
   }
 

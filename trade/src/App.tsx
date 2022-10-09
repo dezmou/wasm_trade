@@ -47,17 +47,18 @@ function App() {
     const finalAfter = [];
     const final = [];
     const bg = [];
-    const perc = engine.current!.funcs.getPumpPercent(cursor).situationResult;
+    const perc = engine.current!.funcs.getPumpPercent(cursor);
+    console.log(perc.isWin);
 
     // for (let i = cursor - 50; i < cursor + 50; i++) {
     for (let i = 0; i < 100; i++) {
       // const line = engine.current!.getLine(i);
       if (i <= cursor) {
-        finalBefore.push(perc.at(i));
+        finalBefore.push(perc.situationResult.at(i));
       } else {
-        finalAfter.push(perc.at(i));
+        finalAfter.push(perc.situationResult.at(i));
       }
-      final.push(perc.at(i))
+      final.push(perc.situationResult.at(i))
       if (i >= 45 && i <= 50) {
         bg.push("red")
       } else {
@@ -93,10 +94,10 @@ function App() {
     let cursor = MIN_CURSOR;
     const final = [];
 
-    const trainingData: any = [];
+    const trainingData: any[] = [];
 
     // for (let i = 0; cursor < 4048620; i++) {
-    for (let i = 0; cursor < MIN_CURSOR + 200000; i++) {
+    for (let i = 0; cursor < MIN_CURSOR + 800000; i++) {
       const res = search(cursor);
       final.push(res.cursorRes)
 
@@ -109,6 +110,7 @@ function App() {
       // printGraph(res.cursorRes)
       // await new Promise(r => setTimeout(r, 0));
     }
+    console.log(trainingData.length);
     net.train(trainingData);
     testCursor.current = cursor;
     console.log("DONE");
@@ -126,7 +128,6 @@ function App() {
       <button onClick={() => {
         const res = search(cursorRef.current);
         const perc = engine.current!.funcs.getPumpPercent(res.cursorRes);
-        console.log(perc.isWin);
         cursorRef.current = res.cursorRes + 1;
         printGraph(res.cursorRes);
       }}>Search next</button>

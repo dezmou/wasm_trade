@@ -112,7 +112,8 @@ function App() {
     }
     console.log(trainingData.length);
     net.train(trainingData);
-    testCursor.current = cursor;
+    // testCursor.current = cursor;
+    testCursor.current = MIN_CURSOR;
     console.log("DONE");
   }
 

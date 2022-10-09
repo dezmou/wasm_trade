@@ -48,7 +48,7 @@ function App() {
     const final = [];
     const bg = [];
     const perc = engine.current!.funcs.getPumpPercent(cursor);
-    console.log(perc.isWin);
+    console.log("REAL", perc.isWin);
 
     // for (let i = cursor - 50; i < cursor + 50; i++) {
     for (let i = 0; i < 100; i++) {
@@ -81,13 +81,13 @@ function App() {
   }
 
   const checkNext = () => {
-      const res = search(testCursor.current);
-      const perc = engine.current!.funcs.getPumpPercent(res.cursorRes);
-      const resBrain = net.run(Array.from(perc.situationResult.subarray(0, 45)))
-      console.log(resBrain);
-      testCursor.current = res.cursorRes + 1;
-      printGraph(testCursor.current);
-      testCursor.current += 1;
+    const res = search(testCursor.current);
+    const perc = engine.current!.funcs.getPumpPercent(res.cursorRes);
+    const resBrain = net.run(Array.from(perc.situationResult.subarray(0, 45)))
+    console.log("PREDICTED ", resBrain);
+    testCursor.current = res.cursorRes + 1;
+    printGraph(testCursor.current);
+    testCursor.current += 1;
   }
 
   const searchLot = async () => {
@@ -97,7 +97,7 @@ function App() {
     const trainingData: any[] = [];
 
     // for (let i = 0; cursor < 4048620; i++) {
-    for (let i = 0; cursor < MIN_CURSOR + 800000; i++) {
+    for (let i = 0; cursor < MIN_CURSOR + 100000; i++) {
       const res = search(cursor);
       final.push(res.cursorRes)
 

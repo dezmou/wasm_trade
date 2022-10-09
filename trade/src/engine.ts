@@ -69,6 +69,7 @@ export const init = async () => {
         return {
             situationResult,
             isWin: miscResult.at(0),
+            changePercent: miscResult.at(1),
         };
     }
 

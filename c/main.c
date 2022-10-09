@@ -14,7 +14,7 @@ typedef struct result {
 
 typedef struct  misc {
     int isWin;
-    int foundIndex;
+    int changePercent;
 } Misc;
 
 void getPumpPercent(Data *data, Result *res, Misc * misc, int cursor){
@@ -25,16 +25,19 @@ void getPumpPercent(Data *data, Result *res, Misc * misc, int cursor){
     }
     for (int i=1; i<50;i++) {
         int chien = (int)(10000 - (initialCheck / data[cursor + i].close * 10000));
-        if (chien < 50) {
+        if (chien < -50) {
             misc->isWin = 1;
+            misc->changePercent = chien;
             return;
         }
         if (chien > 50){
             misc->isWin = 0;
+            misc->changePercent = chien;
             return;
         }
     }
     misc->isWin = 0;
+    misc->changePercent = -1;
 }
 
 int searchPump(Data *data, Result *res, Misc * misc, int cursor) {

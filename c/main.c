@@ -1,3 +1,4 @@
+
 typedef struct  data {
     int time;
     float open;

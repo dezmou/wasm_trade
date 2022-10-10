@@ -80,6 +80,28 @@ function App() {
     })
   }
 
+  const bake = async () => {
+    let nbrBet = 0;
+    let betWon = 0;
+    for (let i = 0; i < 100000; i++) {
+      const res = search(testCursor.current);
+      const perc = engine.current!.funcs.getPercents(res.cursorRes - 50, res.cursorRes);
+      const resBrain = net.run((perc.situationResult as any)) as any
+      if (resBrain.isWin > 0.8) {
+        printGraph(testCursor.current - 50, testCursor.current);
+        const isWin = engine.current!.funcs.isWin(testCursor.current)
+        nbrBet += 1;
+        if (isWin){
+          betWon += 1;
+        }
+        console.log(nbrBet, betWon, `${betWon / nbrBet * 100}% accuracy`);
+        testCursor.current = res.cursorRes + 1;
+        await new Promise(r => setTimeout(r, 0));
+      }
+      testCursor.current = res.cursorRes + 1;
+    }
+  }
+
   const checkNext = () => {
     const res = search(testCursor.current);
     const perc = engine.current!.funcs.getPercents(res.cursorRes - 50, res.cursorRes);
@@ -97,7 +119,7 @@ function App() {
     const trainingData: any[] = [];
 
     // for (let i = 0; cursor < 4048620; i++) {
-    for (let i = 0; cursor < MIN_CURSOR + 100000; i++) {
+    for (let i = 0; cursor < MIN_CURSOR + 200000; i++) {
       const res = search(cursor);
       const perc = engine.current!.funcs.getPercents(res.cursorRes - 50, res.cursorRes);
       const isWin = engine.current!.funcs.isWin(res.cursorRes);
@@ -107,7 +129,7 @@ function App() {
       })
       cursor = res.cursorRes + 1;
     }
-    console.log(trainingData.length);
+    console.log("training amount :", trainingData.length);
     net.train(trainingData);
     testCursor.current = cursor;
     // testCursor.current = MIN_CURSOR;
@@ -134,6 +156,7 @@ function App() {
       }}>Search next</button>
       <button onClick={searchLot}>train</button>
       <button onClick={checkNext}>check next</button>
+      <button onClick={bake}>bake</button>
       {graph1 && <Line data={graph1!}></Line>}
 
     </div>}

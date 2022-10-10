@@ -13,7 +13,7 @@ interface Abi {
         // situationSize: number
     ) => number
 
-    getPumpPercent: (
+    getPercents: (
         memData: number,
         memRresult: number,
         misc: number,
@@ -64,8 +64,8 @@ export const init = async () => {
     }
     const funcs = await loadAsm("./main.wasm");
 
-    const getPumpPercent = (cursor: number) => {
-        funcs.getPumpPercent(0, ptr_result, ptr_misc, cursor)
+    const getPercents = (cursor: number) => {
+        funcs.getPercents(0, ptr_result, ptr_misc, cursor)
         return {
             situationResult,
             isWin: miscResult.at(0),
@@ -94,7 +94,7 @@ export const init = async () => {
         },
         funcs: {
             searchPump,
-            getPumpPercent
+            getPercents
         },
     }
 }

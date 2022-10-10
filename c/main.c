@@ -17,27 +17,27 @@ typedef struct  misc {
     int changePercent;
 } Misc;
 
-void getPumpPercent(Data *data, Result *res, Misc * misc, int cursor){
-    float initial = data[cursor - 50].close;
+void getPercents(Data *data, Result *res, Misc * misc, int cursor) {
+    float initial = data[cursor].close;
     float initialCheck = data[cursor].close;
     for (int i=0; i<100;i++) {
-        res[i].close =  (int)(10000 - (initial / data[cursor + i - 50].close * 10000));
+        res[i].close =  (int)(10000 - (initial / data[cursor + i].close * 10000));
     }
-    for (int i=1; i<50;i++) {
-        int chien = (int)(10000 - (initialCheck / data[cursor + i].close * 10000));
-        if (chien < -50) {
-            misc->isWin = 1;
-            misc->changePercent = chien;
-            return;
-        }
-        if (chien > 50){
-            misc->isWin = 0;
-            misc->changePercent = chien;
-            return;
-        }
-    }
-    misc->isWin = 0;
-    misc->changePercent = -1;
+    // for (int i=1; i<50;i++) {
+    //     int chien = (int)(10000 - (initialCheck / data[cursor + i].close * 10000));
+    //     if (chien < -50) {
+    //         misc->isWin = 1;
+    //         misc->changePercent = chien;
+    //         return;
+    //     }
+    //     if (chien > 50){
+    //         misc->isWin = 0;
+    //         misc->changePercent = chien;
+    //         return;
+    //     }
+    // }
+    // misc->isWin = 0;
+    // misc->changePercent = -1;
 }
 
 int searchPump(Data *data, Result *res, Misc * misc, int cursor) {

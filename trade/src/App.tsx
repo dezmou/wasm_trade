@@ -12,7 +12,7 @@ import {
   Legend,
 } from 'chart.js'
 import { Line } from 'react-chartjs-2'
-import { recurrent, NeuralNetwork, NeuralNetworkGPU } from "brain.js"
+import { recurrent, NeuralNetwork, NeuralNetworkGPU, likely } from "brain.js"
 
 ChartJS.register(
   CategoryScale,
@@ -42,24 +42,26 @@ function App() {
     return res;
   }
 
-  const printGraph = (cursor: number) => {
-    const finalBefore = [];
-    const finalAfter = [];
+  const printGraph = (startCursor: number, cursorBet: number) => {
+    // const finalBefore = [];
+    // const finalAfter = [];
     const final = [];
     const bg = [];
-    const perc = engine.current!.funcs.getPumpPercent(cursor);
+    const perc = engine.current!.funcs.getPercents(startCursor);
     console.log("REAL", perc.isWin);
+
+    const diff = cursorBet - startCursor
 
     // for (let i = cursor - 50; i < cursor + 50; i++) {
     for (let i = 0; i < 100; i++) {
       // const line = engine.current!.getLine(i);
-      if (i <= cursor) {
-        finalBefore.push(perc.situationResult.at(i));
-      } else {
-        finalAfter.push(perc.situationResult.at(i));
-      }
+      // if (i <= cursor) {
+      //   finalBefore.push(perc.situationResult.at(i));
+      // } else {
+      //   finalAfter.push(perc.situationResult.at(i));
+      // }
       final.push(perc.situationResult.at(i))
-      if (i >= 45 && i <= 50) {
+      if (i >= diff - 5 && i <= diff) {
         bg.push("red")
       } else {
         bg.push("blue");
@@ -82,11 +84,12 @@ function App() {
 
   const checkNext = () => {
     const res = search(testCursor.current);
-    const perc = engine.current!.funcs.getPumpPercent(res.cursorRes);
-    const resBrain = net.run(Array.from(perc.situationResult.subarray(0, 45)))
+    const perc = engine.current!.funcs.getPercents(res.cursorRes);
+    const resBrain = net.run(Array.from(perc.situationResult.subarray(0, 49)))
+
     console.log("PREDICTED ", resBrain);
     testCursor.current = res.cursorRes + 1;
-    printGraph(testCursor.current);
+    // printGraph(testCursor.current);
     testCursor.current += 1;
   }
 
@@ -101,9 +104,9 @@ function App() {
       const res = search(cursor);
       final.push(res.cursorRes)
 
-      const perc = engine.current!.funcs.getPumpPercent(res.cursorRes);
+      const perc = engine.current!.funcs.getPercents(res.cursorRes);
       trainingData.push({
-        input: Array.from(perc.situationResult.subarray(0, 45)),
+        input: Array.from(perc.situationResult.subarray(0, 49)),
         output: { isWin: perc.isWin }
       })
       cursor = res.cursorRes + 1;
@@ -112,8 +115,8 @@ function App() {
     }
     console.log(trainingData.length);
     net.train(trainingData);
-    // testCursor.current = cursor;
-    testCursor.current = MIN_CURSOR;
+    testCursor.current = cursor;
+    // testCursor.current = MIN_CURSOR;
     console.log("DONE");
   }
 
@@ -128,9 +131,10 @@ function App() {
     {ready && <div>
       <button onClick={() => {
         const res = search(cursorRef.current);
-        const perc = engine.current!.funcs.getPumpPercent(res.cursorRes);
+        const perc = engine.current!.funcs.getPercents(res.cursorRes);
         cursorRef.current = res.cursorRes + 1;
-        printGraph(res.cursorRes);
+        // printGraph(res.cursorRes - 50, res.cursorRes);
+        printGraph(res.cursorRes - 50, res.cursorRes);
       }}>Search next</button>
       <button onClick={searchLot}>train</button>
       <button onClick={checkNext}>check next</button>

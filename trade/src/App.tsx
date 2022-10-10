@@ -84,11 +84,10 @@ function App() {
     const res = search(testCursor.current);
     const perc = engine.current!.funcs.getPercents(res.cursorRes - 50, res.cursorRes);
     const resBrain = net.run((perc.situationResult as any))
-
-    testCursor.current = res.cursorRes + 1;
     printGraph(testCursor.current - 50, testCursor.current);
     console.log(resBrain);
-    testCursor.current += 1;
+    testCursor.current = res.cursorRes + 1;
+    // testCursor.current += 1;
   }
 
   const searchLot = async () => {

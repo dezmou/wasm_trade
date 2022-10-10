@@ -37,6 +37,8 @@ function App() {
 
   const testCursor = useRef(0);
 
+  const [bakeRes, setBakeRes] = useState({ nbrBet: 0, nbrWon: 0, acc: 0 });
+
   const search = (cursor: number) => {
     const res = engine.current!.funcs.searchPump(cursor);
     return res;
@@ -83,20 +85,26 @@ function App() {
   const bake = async () => {
     let nbrBet = 0;
     let betWon = 0;
-    for (let i = 0; i < 100000; i++) {
+    for (let i = 0; i < 1000000; i++) {
+      if (testCursor.current > 4070000) return;
       const res = search(testCursor.current);
       const perc = engine.current!.funcs.getPercents(res.cursorRes - 50, res.cursorRes);
       const resBrain = net.run((perc.situationResult as any)) as any
-      if (resBrain.isWin > 0.8) {
-        printGraph(testCursor.current - 50, testCursor.current);
+      if (resBrain.isWin > 0.6) {
         const isWin = engine.current!.funcs.isWin(testCursor.current)
         nbrBet += 1;
-        if (isWin){
+        if (isWin) {
           betWon += 1;
         }
-        console.log(nbrBet, betWon, `${betWon / nbrBet * 100}% accuracy`);
-        testCursor.current = res.cursorRes + 1;
-        await new Promise(r => setTimeout(r, 0));
+        if (i % 20 === 0) {
+          printGraph(testCursor.current - 50, testCursor.current);
+          setBakeRes({
+            acc: betWon / nbrBet * 100,
+            nbrBet: nbrBet,
+            nbrWon: betWon
+          })
+          await new Promise(r => setTimeout(r, 0));
+        }
       }
       testCursor.current = res.cursorRes + 1;
     }
@@ -119,10 +127,12 @@ function App() {
     const trainingData: any[] = [];
 
     // for (let i = 0; cursor < 4048620; i++) {
-    for (let i = 0; cursor < MIN_CURSOR + 200000; i++) {
+    let nbrTrain = 0;
+    for (let i = 0; nbrTrain < 50 ; i++) {
       const res = search(cursor);
       const perc = engine.current!.funcs.getPercents(res.cursorRes - 50, res.cursorRes);
       const isWin = engine.current!.funcs.isWin(res.cursorRes);
+      nbrTrain += 1;
       trainingData.push({
         input: perc.situationResult,
         output: { isWin: isWin }
@@ -131,6 +141,8 @@ function App() {
     }
     console.log("training amount :", trainingData.length);
     net.train(trainingData);
+    const res = net.toJSON()
+    console.log(res);
     testCursor.current = cursor;
     // testCursor.current = MIN_CURSOR;
     console.log("DONE");
@@ -158,6 +170,11 @@ function App() {
       <button onClick={checkNext}>check next</button>
       <button onClick={bake}>bake</button>
       {graph1 && <Line data={graph1!}></Line>}
+      <div style={{ fontSize: "2rem" }}>
+        Nbr bet : {bakeRes.nbrBet} <br />
+        Nbr won : {bakeRes.nbrWon} <br />
+        <span style={{ fontSize: "3rem" }}>Accuracy : {bakeRes.acc}% <br /></span>
+      </div>
 
     </div>}
   </>

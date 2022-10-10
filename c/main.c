@@ -17,6 +17,20 @@ typedef struct  misc {
     int changePercent;
 } Misc;
 
+int isWin(Data *data, Result *res, Misc * misc, int cursor) {
+    float initialCheck = data[cursor].close;
+    for (int i=1; i<50;i++) {
+        int chien = (int)(10000 - (initialCheck / data[cursor + i].close * 10000));
+        if (chien < -50) {
+            return 1;
+        }
+        if (chien > 50){
+            return 0;
+        }
+    }
+    return 0;
+}
+
 void getPercents(Data *data, Result *res, Misc * misc, int cursor) {
     float initial = data[cursor].close;
     float initialCheck = data[cursor].close;

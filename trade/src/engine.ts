@@ -19,6 +19,14 @@ interface Abi {
         misc: number,
         cursor: number,
     ) => void
+
+    isWin: (
+        memData: number,
+        memRresult: number,
+        misc: number,
+        cursor: number,
+    ) => number
+
 }
 
 const misc = {
@@ -68,8 +76,6 @@ export const init = async () => {
         funcs.getPercents(0, ptr_result, ptr_misc, cursor)
         return {
             situationResult,
-            isWin: miscResult.at(0),
-            changePercent: miscResult.at(1),
         };
     }
 
@@ -78,6 +84,10 @@ export const init = async () => {
         return {
             cursorRes: res,
         }
+    }
+
+    const isWin = (cursor: number) => {
+        return funcs.isWin(0, ptr_result, ptr_misc, cursor)
     }
 
     return {
@@ -94,7 +104,8 @@ export const init = async () => {
         },
         funcs: {
             searchPump,
-            getPercents
+            getPercents,
+            isWin
         },
     }
 }

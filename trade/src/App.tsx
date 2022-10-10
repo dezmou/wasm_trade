@@ -30,7 +30,7 @@ const net = new NeuralNetwork({
   log: (e) => {
     console.log(e);
   },
-  // hiddenLayers: [50,24,8],
+  hiddenLayers: [100, 8],
 });
 // const net = new NeuralNetworkGPU();
 
@@ -58,14 +58,7 @@ function App() {
     const perc = engine.current!.funcs.getPercents(startCursor, startCursor + 100);
     const diff = cursorBet - startCursor
 
-    // for (let i = cursor - 50; i < cursor + 50; i++) {
     for (let i = 0; i < 100; i++) {
-      // const line = engine.current!.getLine(i);
-      // if (i <= cursor) {
-      //   finalBefore.push(perc.situationResult.at(i));
-      // } else {
-      //   finalAfter.push(perc.situationResult.at(i));
-      // }
       final.push(perc.situationResult.at(i))
       if (i >= diff - 5 && i <= diff) {
         bg.push("red")
@@ -96,7 +89,6 @@ function App() {
       const res = search(testCursor.current);
       const perc = engine.current!.funcs.getPercents(res.cursorRes - 50, res.cursorRes);
       const resBrain = net.run((Array.from(perc.situationResult) as any)) as any
-      console.log(resBrain.isWin);
       if (resBrain.isWin > 0.7) {
         const isWin = engine.current!.funcs.isWin(testCursor.current)
         nbrBet += 1;
@@ -135,7 +127,7 @@ function App() {
 
     // for (let i = 0; cursor < 4048620; i++) {
     let nbrTrain = 0;
-    for (let i = 0; nbrTrain < 40; i++) {
+    for (let i = 0; nbrTrain < 100; i++) {
       const res = search(cursor);
       const perc = engine.current!.funcs.getPercents(res.cursorRes - 50, res.cursorRes);
       const isWin = engine.current!.funcs.isWin(res.cursorRes);

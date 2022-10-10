@@ -16,8 +16,9 @@ typedef struct  misc {
     int changePercent;
 } Misc;
 
-#define WIN_CHANGE 37
-#define IS_PUMP 90
+#define WIN_CHANGE 33
+#define LOST_CHANGE 33
+#define IS_PUMP 100
 
 // void getPumpData(Data *data, Result *res, Misc * misc, int cursor){
 
@@ -30,7 +31,7 @@ int isWin(Data *data, Result *res, Misc * misc, int cursor) {
         if (chien < -WIN_CHANGE) {
             return 1;
         }
-        if (chien > WIN_CHANGE){
+        if (chien > LOST_CHANGE){
             return 0;
         }
     }

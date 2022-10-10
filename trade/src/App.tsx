@@ -47,7 +47,7 @@ function App() {
     // const finalAfter = [];
     const final = [];
     const bg = [];
-    const perc = engine.current!.funcs.getPercents(startCursor);
+    const perc = engine.current!.funcs.getPercents(startCursor, startCursor + 100);
     const diff = cursorBet - startCursor
 
     // for (let i = cursor - 50; i < cursor + 50; i++) {
@@ -81,13 +81,13 @@ function App() {
   }
 
   const checkNext = () => {
-    const res = search(testCursor.current);
-    const perc = engine.current!.funcs.getPercents(res.cursorRes);
-    const resBrain = net.run(Array.from(perc.situationResult.subarray(0, 49)))
+    // const res = search(testCursor.current);
+    // const perc = engine.current!.funcs.getPercents(res.cursorRes);
+    // const resBrain = net.run(Array.from(perc.situationResult.subarray(0, 49)))
 
-    testCursor.current = res.cursorRes + 1;
-    // printGraph(testCursor.current);
-    testCursor.current += 1;
+    // testCursor.current = res.cursorRes + 1;
+    // // printGraph(testCursor.current);
+    // testCursor.current += 1;
   }
 
   const searchLot = async () => {
@@ -99,9 +99,9 @@ function App() {
     // for (let i = 0; cursor < 4048620; i++) {
     for (let i = 0; cursor < MIN_CURSOR + 100000; i++) {
       const res = search(cursor);
-      final.push(res.cursorRes)
+      const perc = engine.current!.funcs.getPercents(res.cursorRes - 50, res.cursorRes);
+      const isWin = engine.current!.funcs.isWin(res.cursorRes);
 
-      const perc = engine.current!.funcs.getPercents(res.cursorRes);
       // trainingData.push({
       //   input: Array.from(perc.situationResult.subarray(0, 49)),
       //   output: { isWin: perc.isWin }
@@ -128,7 +128,7 @@ function App() {
     {ready && <div>
       <button onClick={() => {
         const res = search(cursorRef.current);
-        const perc = engine.current!.funcs.getPercents(res.cursorRes);
+        // const perc = engine.current!.funcs.getPercents(res.cursorRes);
         const isWin = engine.current!.funcs.isWin(res.cursorRes);
         cursorRef.current = res.cursorRes + 1;
         printGraph(res.cursorRes - 50, res.cursorRes);

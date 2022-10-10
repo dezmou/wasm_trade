@@ -18,6 +18,7 @@ interface Abi {
         memRresult: number,
         misc: number,
         cursor: number,
+        end : number,
     ) => void
 
     isWin: (
@@ -72,8 +73,8 @@ export const init = async () => {
     }
     const funcs = await loadAsm("./main.wasm");
 
-    const getPercents = (cursor: number) => {
-        funcs.getPercents(0, ptr_result, ptr_misc, cursor)
+    const getPercents = (cursor: number, end : number) => {
+        funcs.getPercents(0, ptr_result, ptr_misc, cursor, end)
         return {
             situationResult,
         };

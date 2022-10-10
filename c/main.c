@@ -1,4 +1,3 @@
-
 typedef struct  data {
     int time;
     float open;
@@ -31,27 +30,13 @@ int isWin(Data *data, Result *res, Misc * misc, int cursor) {
     return 0;
 }
 
-void getPercents(Data *data, Result *res, Misc * misc, int cursor) {
+void getPercents(Data *data, Result *res, Misc * misc, int cursor, int endCursor) {
     float initial = data[cursor].close;
-    float initialCheck = data[cursor].close;
-    for (int i=0; i<100;i++) {
-        res[i].close =  (int)(10000 - (initial / data[cursor + i].close * 10000));
+    int i = 0;
+    for (; cursor <= endCursor ; cursor++) {
+        res[i].close =  (int)(10000 - (initial / data[cursor].close * 10000));
+        i += 1;
     }
-    // for (int i=1; i<50;i++) {
-    //     int chien = (int)(10000 - (initialCheck / data[cursor + i].close * 10000));
-    //     if (chien < -50) {
-    //         misc->isWin = 1;
-    //         misc->changePercent = chien;
-    //         return;
-    //     }
-    //     if (chien > 50){
-    //         misc->isWin = 0;
-    //         misc->changePercent = chien;
-    //         return;
-    //     }
-    // }
-    // misc->isWin = 0;
-    // misc->changePercent = -1;
 }
 
 int searchPump(Data *data, Result *res, Misc * misc, int cursor) {

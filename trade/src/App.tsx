@@ -26,8 +26,14 @@ ChartJS.register(
 
 type lineProps = React.ComponentProps<typeof Line>
 
-const net = new NeuralNetwork();
+const net = new NeuralNetwork({
+  log: (e) => {
+    console.log(e);
+  },
+  // hiddenLayers: [50,24,8],
+});
 // const net = new NeuralNetworkGPU();
+
 
 function App() {
   const [ready, setReady] = useState(false);
@@ -86,11 +92,12 @@ function App() {
     let nbrBet = 0;
     let betWon = 0;
     for (let i = 0; i < 1000000; i++) {
-      if (testCursor.current > 4070000) return;
+      if (testCursor.current > 4060000) return;
       const res = search(testCursor.current);
       const perc = engine.current!.funcs.getPercents(res.cursorRes - 50, res.cursorRes);
-      const resBrain = net.run((perc.situationResult as any)) as any
-      if (resBrain.isWin > 0.6) {
+      const resBrain = net.run((Array.from(perc.situationResult) as any)) as any
+      console.log(resBrain.isWin);
+      if (resBrain.isWin > 0.7) {
         const isWin = engine.current!.funcs.isWin(testCursor.current)
         nbrBet += 1;
         if (isWin) {
@@ -128,7 +135,7 @@ function App() {
 
     // for (let i = 0; cursor < 4048620; i++) {
     let nbrTrain = 0;
-    for (let i = 0; nbrTrain < 50 ; i++) {
+    for (let i = 0; nbrTrain < 40; i++) {
       const res = search(cursor);
       const perc = engine.current!.funcs.getPercents(res.cursorRes - 50, res.cursorRes);
       const isWin = engine.current!.funcs.isWin(res.cursorRes);
@@ -140,7 +147,9 @@ function App() {
       cursor = res.cursorRes + 1;
     }
     console.log("training amount :", trainingData.length);
-    net.train(trainingData);
+    net.train(trainingData, {
+      logPeriod: 500,
+    });
     const res = net.toJSON()
     console.log(res);
     testCursor.current = cursor;

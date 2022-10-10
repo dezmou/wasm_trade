@@ -16,14 +16,21 @@ typedef struct  misc {
     int changePercent;
 } Misc;
 
+#define WIN_CHANGE 37
+#define IS_PUMP 90
+
+// void getPumpData(Data *data, Result *res, Misc * misc, int cursor){
+
+// }
+
 int isWin(Data *data, Result *res, Misc * misc, int cursor) {
     float initialCheck = data[cursor].close;
     for (int i=1; i<50;i++) {
         int chien = (int)(10000 - (initialCheck / data[cursor + i].close * 10000));
-        if (chien < -50) {
+        if (chien < -WIN_CHANGE) {
             return 1;
         }
-        if (chien > 50){
+        if (chien > WIN_CHANGE){
             return 0;
         }
     }
@@ -42,7 +49,7 @@ void getPercents(Data *data, Result *res, Misc * misc, int cursor, int endCursor
 int searchPump(Data *data, Result *res, Misc * misc, int cursor) {
     for (int i=0; i< 10000000; i++){
         int move = (int)(10000 - (data[cursor + i - 5].close / data[cursor + i].close * 10000));
-        if (move > 110){
+        if (move > IS_PUMP){
             return cursor + i;
         }
     }

@@ -18,7 +18,8 @@ typedef struct  misc {
 
 #define WIN_CHANGE 33
 #define LOST_CHANGE 33
-#define IS_PUMP 100
+#define IS_PUMP 300
+#define PUMP_BACK_MINUTE 1
 
 // void getPumpData(Data *data, Result *res, Misc * misc, int cursor){
 
@@ -49,7 +50,7 @@ void getPercents(Data *data, Result *res, Misc * misc, int cursor, int endCursor
 
 int searchPump(Data *data, Result *res, Misc * misc, int cursor) {
     for (int i=0; i< 10000000; i++){
-        int move = (int)(10000 - (data[cursor + i - 5].close / data[cursor + i].close * 10000));
+        int move = (int)(10000 - (data[cursor + i - PUMP_BACK_MINUTE].close / data[cursor + i].close * 10000));
         if (move > IS_PUMP){
             return cursor + i;
         }

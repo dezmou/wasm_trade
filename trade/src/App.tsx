@@ -81,7 +81,7 @@ function App() {
             animation: false,
             segment: {
               borderColor: ctx => {
-                return ctx.p0DataIndex + startCursor <= stateRef.current.cursor ? "red" : "blue"
+                return ctx.p0DataIndex + startCursor < stateRef.current.cursor ? "red" : "blue"
               }
             }
           },
@@ -92,8 +92,9 @@ function App() {
   }
 
   const simulateNext = () => {
-    const res = engine.current!.funcs.searchPump(stateRef.current.cursor);
-    const perc = engine.current!.funcs.getPercents(res.cursorRes - 50, res.cursorRes);
+    const res = engine.current!.funcs.searchPump(stateRef.current.cursor + 1);
+    const perc = engine.current!.funcs.getPercents(res.cursorRes - 50, res.cursorRes+1);
+    console.log(perc);
     const resBrain = net.run((Array.from(perc.situationResult) as any)) as any
     stateRef.current.nextCheck.bet = false;
     stateRef.current.nextCheck.percent = resBrain.isWin;
@@ -108,7 +109,7 @@ function App() {
       }
       stateRef.current.trainRes.ratio = stateRef.current.trainRes.nbrWon / stateRef.current.trainRes.nbrBet * 100;
     }
-    stateRef.current.cursor = res.cursorRes + 1;
+    stateRef.current.cursor = res.cursorRes;
   }
 
   const simulate = async () => {
@@ -144,7 +145,7 @@ function App() {
     let nbrTrain = 0;
     for (let i = 0; nbrTrain < stateRef.current.nbrPumpTrain; i++) {
       const res = engine.current!.funcs.searchPump(stateRef.current.cursor);
-      const perc = engine.current!.funcs.getPercents(res.cursorRes - 50, res.cursorRes);
+      const perc = engine.current!.funcs.getPercents(res.cursorRes - 50, res.cursorRes+1);
       const isWin = engine.current!.funcs.isWin(res.cursorRes);
       nbrTrain += 1;
       trainingData.push({

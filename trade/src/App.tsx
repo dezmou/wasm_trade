@@ -198,17 +198,8 @@ function App() {
     const perc = engine.current!.funcs.getPercents(startCursor, cursor + 100);
 
     const final: number[] = [];
-    const bg: string[] = [];
-
-    let chienCursor = startCursor;
     for (let i = 0; i < 100; i++) {
       final.push(perc.situationResult.at(i)! / 100)
-      if (chienCursor <= cursor) {
-        bg.push("red")
-      } else {
-        bg.push("blue");
-      }
-      chienCursor += 1;
     }
 
     updateState({
@@ -220,9 +211,12 @@ function App() {
             label: "close",
             data: final,
             fill: true,
-            backgroundColor: bg,
-            borderColor: bg,
-            animation: false
+            animation: false,
+            segment: {
+              borderColor: ctx => {
+                return ctx.p0DataIndex + startCursor <= cursor ? "red" : "blue"
+              }
+            }
           },
         ]
       }

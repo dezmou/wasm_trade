@@ -27,7 +27,6 @@ interface Abi {
         misc: number,
         cursor: number,
     ) => number
-
 }
 
 const misc = {

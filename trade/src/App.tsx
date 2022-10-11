@@ -1,18 +1,11 @@
-import React, { useEffect, useRef, useState } from 'react';
-import logo from './logo.svg';
-import { init, LINE_SIZE, MIN_CURSOR } from "./engine"
+import { NeuralNetwork } from "brain.js";
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-} from 'chart.js'
-import { Line } from 'react-chartjs-2'
-import { recurrent, NeuralNetwork, NeuralNetworkGPU, likely } from "brain.js"
+  CategoryScale, Chart as ChartJS, Legend, LinearScale, LineElement, PointElement, Title,
+  Tooltip
+} from 'chart.js';
+import React, { useEffect, useRef, useState } from 'react';
+import { Line } from 'react-chartjs-2';
+import { init, MIN_CURSOR } from "./engine";
 
 ChartJS.register(
   CategoryScale,
@@ -30,7 +23,7 @@ const net = new NeuralNetwork({
   log: (e) => {
     console.log(e);
   },
-  hiddenLayers: [100, 8],
+  // hiddenLayers: [100, 8],
 });
 // const net = new NeuralNetworkGPU();
 

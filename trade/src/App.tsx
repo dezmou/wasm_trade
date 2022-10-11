@@ -134,7 +134,7 @@ function AppOld() {
     }
     console.log("training amount :", trainingData.length);
     net.train(trainingData, {
-      logPeriod: 500,
+      logPeriod: 100,
     });
     const res = net.toJSON()
     console.log(res);
@@ -337,7 +337,7 @@ function App() {
             updateState(({ ...stateRef.current, nbrPumpTrain: parseInt(e.target.value) }))
           }}
         ></input>
-        {state.training && <div>training in progress....</div>}<br /><br />
+        {state.training && <div>training in progress.... </div>}<br /><br />
         {state.trained && <div>
           <button onClick={simulate}>simulate trained from here</button><br />
           nbrBet : {state.trainRes.nbrBet}<br />

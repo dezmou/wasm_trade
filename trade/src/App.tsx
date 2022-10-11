@@ -60,7 +60,7 @@ function App() {
 
   const printGraph = () => {
     const startCursor = stateRef.current.cursor - 50;
-    const perc = engine.current!.funcs.getPercents(startCursor, stateRef.current.cursor + 100);
+    const perc = engine.current!.funcs.getPercents(startCursor, stateRef.current.cursor + 50);
     const line = engine.current!.getLine(stateRef.current.cursor)
 
     const final: number[] = [];
@@ -93,13 +93,12 @@ function App() {
 
   const simulateNext = () => {
     const res = engine.current!.funcs.searchPump(stateRef.current.cursor + 1);
-    const perc = engine.current!.funcs.getPercents(res.cursorRes - 50, res.cursorRes+1);
-    console.log(perc);
+    const perc = engine.current!.funcs.getPercents(res.cursorRes - 50, res.cursorRes);
     const resBrain = net.run((Array.from(perc.situationResult) as any)) as any
     stateRef.current.nextCheck.bet = false;
     stateRef.current.nextCheck.percent = resBrain.isWin;
 
-    if (resBrain.isWin > 0.98) {
+    if (resBrain.isWin > 0.85) {
       stateRef.current.nextCheck.bet = true;
       const isWin = engine.current!.funcs.isWin(stateRef.current.cursor)
       stateRef.current.nextCheck.won = isWin === 1 ? true : false;
@@ -145,7 +144,7 @@ function App() {
     let nbrTrain = 0;
     for (let i = 0; nbrTrain < stateRef.current.nbrPumpTrain; i++) {
       const res = engine.current!.funcs.searchPump(stateRef.current.cursor);
-      const perc = engine.current!.funcs.getPercents(res.cursorRes - 50, res.cursorRes+1);
+      const perc = engine.current!.funcs.getPercents(res.cursorRes - 50, res.cursorRes);
       const isWin = engine.current!.funcs.isWin(res.cursorRes);
       nbrTrain += 1;
       trainingData.push({
@@ -220,11 +219,11 @@ function App() {
               simulateNext()
               updateState(stateRef.current);
               printGraph();
-            }}>Check next pump</button><br/>
+            }}>Check next pump</button><br />
             Result : {stateRef.current.nextCheck.percent}<br />
             bet : {stateRef.current.nextCheck.bet ? "yes" : "no"}<br />
             won : {stateRef.current.nextCheck.won ? "yes" : "no"}<br />
-            <br/>
+            <br />
           </div>
           <button onClick={simulate}>Check all remaining</button><br />
           nbrBet : {state.trainRes.nbrBet}<br />

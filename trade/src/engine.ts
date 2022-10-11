@@ -75,7 +75,7 @@ export const init = async () => {
     const getPercents = (cursor: number, end : number) => {
         funcs.getPercents(0, ptr_result, ptr_misc, cursor, end)
         return {
-            situationResult : situationResult.slice(0, end - cursor),
+            situationResult : situationResult.slice(0, end - cursor + 1),
         };
     }
 

@@ -16,8 +16,8 @@ typedef struct  misc {
     int changePercent;
 } Misc;
 
-#define WIN_CHANGE 33
-#define LOST_CHANGE 33
+#define WIN_CHANGE 25
+#define LOST_CHANGE 25
 #define IS_PUMP 300
 #define PUMP_BACK_MINUTE 1
 

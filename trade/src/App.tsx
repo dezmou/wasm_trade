@@ -186,6 +186,11 @@ function App() {
     nbrPumpTrain: 10,
     trained: false,
     training: false,
+    trainRes: {
+      nbrBet: 0,
+      nbrWon: 0,
+      ratio: 0,
+    }
   }
 
   const engine = useRef<Awaited<ReturnType<typeof init>> | null>(null)
@@ -231,11 +236,35 @@ function App() {
 
   }
 
+  const simulate = async () => {
+    let i = 0;
+    while (stateRef.current.cursor < 4060000) {
+      i += 1;
+      const res = engine.current!.funcs.searchPump(stateRef.current.cursor);
+      const perc = engine.current!.funcs.getPercents(res.cursorRes - 50, res.cursorRes);
+      const resBrain = net.run((Array.from(perc.situationResult) as any)) as any
+      if (resBrain.isWin > 0.7) {
+        const isWin = engine.current!.funcs.isWin(stateRef.current.cursor)
+        stateRef.current.trainRes.nbrBet += 1;
+        if (isWin) {
+          stateRef.current.trainRes.nbrWon += 1;
+        }
+        stateRef.current.trainRes.ratio = stateRef.current.trainRes.nbrWon / stateRef.current.trainRes.nbrBet * 100;
+        if (i % 20 === 0) {
+          updateState(stateRef.current);
+          printGraph();
+          await new Promise(r => setTimeout(r, 0));
+        }
+      }
+      stateRef.current.cursor = res.cursorRes + 1;
+    }
+  }
+
   const train = async () => {
     const final = [];
 
     const trainingData: any[] = [];
-    updateState({ ...stateRef.current, training: true })
+    updateState({ ...stateRef.current, training: true, trained: false })
     let nbrTrain = 0;
     for (let i = 0; nbrTrain < stateRef.current.nbrPumpTrain; i++) {
       const res = engine.current!.funcs.searchPump(stateRef.current.cursor);
@@ -252,6 +281,7 @@ function App() {
       console.log(stateRef.current.cursor);
       await new Promise(r => setTimeout(r, 5));
     }
+    await new Promise(r => setTimeout(r, 100));
     net.train(trainingData, {
       logPeriod: 500,
     });
@@ -307,7 +337,13 @@ function App() {
             updateState(({ ...stateRef.current, nbrPumpTrain: parseInt(e.target.value) }))
           }}
         ></input>
-        {state.training && <div>training in progress....</div>}
+        {state.training && <div>training in progress....</div>}<br /><br />
+        {state.trained && <div>
+          <button onClick={simulate}>simulate trained from here</button><br />
+          nbrBet : {state.trainRes.nbrBet}<br />
+          nbrWon : {state.trainRes.nbrWon}<br />
+          <strong>ratio : {state.trainRes.ratio}</strong><br />
+        </div>}
 
       </div>
 

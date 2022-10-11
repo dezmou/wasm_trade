@@ -24,7 +24,7 @@ const net = new NeuralNetwork({
   log: (e) => {
     console.log(e);
   },
-  // hiddenLayers: [100, 8],
+  hiddenLayers: [50,50,50],
 });
 
 function App() {
@@ -98,7 +98,7 @@ function App() {
     stateRef.current.nextCheck.bet = false;
     stateRef.current.nextCheck.percent = resBrain.isWin;
 
-    if (resBrain.isWin > 0.85) {
+    if (resBrain.isWin > 0.6) {
       stateRef.current.nextCheck.bet = true;
       const isWin = engine.current!.funcs.isWin(stateRef.current.cursor)
       stateRef.current.nextCheck.won = isWin === 1 ? true : false;
@@ -111,21 +111,17 @@ function App() {
     stateRef.current.cursor = res.cursorRes;
   }
 
+  const simulateNextWithPump = () => {
+    while (stateRef.current.cursor < 4060000) {
+      simulateNext();
+      if (stateRef.current.nextCheck.bet) break;
+    }
+  }
+
   const simulate = async () => {
     let i = 0;
     while (stateRef.current.cursor < 4060000) {
       i += 1;
-      // const res = engine.current!.funcs.searchPump(stateRef.current.cursor);
-      // const perc = engine.current!.funcs.getPercents(res.cursorRes - 50, res.cursorRes);
-      // const resBrain = net.run((Array.from(perc.situationResult) as any)) as any
-      // if (resBrain.isWin > 0.98) {
-      //   const isWin = engine.current!.funcs.isWin(stateRef.current.cursor)
-      //   stateRef.current.trainRes.nbrBet += 1;
-      //   if (isWin) {
-      //     stateRef.current.trainRes.nbrWon += 1;
-      //   }
-      //   stateRef.current.trainRes.ratio = stateRef.current.trainRes.nbrWon / stateRef.current.trainRes.nbrBet * 100;
-      // }
       simulateNext();
       if (i % 20 === 0) {
         updateState(stateRef.current);
@@ -219,7 +215,12 @@ function App() {
               simulateNext()
               updateState(stateRef.current);
               printGraph();
-            }}>Check next pump</button><br />
+            }}>Check next pump</button>
+            <button onClick={() => {
+              simulateNextWithPump()
+              updateState(stateRef.current);
+              printGraph();
+            }}>Check next pump with bet</button><br />
             Result : {stateRef.current.nextCheck.percent}<br />
             bet : {stateRef.current.nextCheck.bet ? "yes" : "no"}<br />
             won : {stateRef.current.nextCheck.won ? "yes" : "no"}<br />

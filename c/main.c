@@ -16,10 +16,10 @@ typedef struct  misc {
     int changePercent;
 } Misc;
 
-#define WIN_CHANGE 25
-#define LOST_CHANGE 25
-#define IS_PUMP 300
-#define PUMP_BACK_MINUTE 1
+#define WIN_CHANGE 20
+#define LOST_CHANGE 20
+#define IS_PUMP 100
+#define PUMP_BACK_MINUTE 3
 
 // void getPumpData(Data *data, Result *res, Misc * misc, int cursor){
 

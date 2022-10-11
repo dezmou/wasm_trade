@@ -1,4 +1,4 @@
-import { NeuralNetwork } from "brain.js";
+import { NeuralNetwork, likely } from "brain.js";
 import {
   CategoryScale, Chart as ChartJS, Legend, LinearScale, LineElement, PointElement, Title,
   Tooltip
@@ -26,156 +26,6 @@ const net = new NeuralNetwork({
   },
   // hiddenLayers: [100, 8],
 });
-// const net = new NeuralNetworkGPU();
-
-
-function AppOld() {
-  const [ready, setReady] = useState(false);
-  const [graph1, setGraph1] = useState<lineProps["data"] | null>(null)
-  const engine = useRef<Awaited<ReturnType<typeof init>> | null>(null)
-  const cursorRef = useRef(MIN_CURSOR);
-
-  const testCursor = useRef(0);
-
-  const [bakeRes, setBakeRes] = useState({ nbrBet: 0, nbrWon: 0, acc: 0 });
-
-  const search = (cursor: number) => {
-    const res = engine.current!.funcs.searchPump(cursor);
-    return res;
-  }
-
-  const printGraph = (startCursor: number, cursorBet: number) => {
-    // const finalBefore = [];
-    // const finalAfter = [];
-    const final = [];
-    const bg = [];
-    const perc = engine.current!.funcs.getPercents(startCursor, startCursor + 100);
-    const diff = cursorBet - startCursor
-
-    for (let i = 0; i < 100; i++) {
-      final.push(perc.situationResult.at(i))
-      if (i >= diff - 5 && i <= diff) {
-        bg.push("red")
-      } else {
-        bg.push("blue");
-      }
-    }
-    setGraph1({
-      labels: final.map((e, i) => i),
-      datasets: [
-        {
-          label: "open",
-          data: final,
-          // fill: true,
-          backgroundColor: bg,
-          borderColor: bg,
-          animation: false
-        },
-      ]
-    })
-  }
-
-  const bake = async () => {
-    let nbrBet = 0;
-    let betWon = 0;
-    for (let i = 0; i < 1000000; i++) {
-      if (testCursor.current > 4060000) return;
-      const res = search(testCursor.current);
-      const perc = engine.current!.funcs.getPercents(res.cursorRes - 50, res.cursorRes);
-      const resBrain = net.run((Array.from(perc.situationResult) as any)) as any
-      if (resBrain.isWin > 0.7) {
-        const isWin = engine.current!.funcs.isWin(testCursor.current)
-        nbrBet += 1;
-        if (isWin) {
-          betWon += 1;
-        }
-        if (i % 20 === 0) {
-          printGraph(testCursor.current - 50, testCursor.current);
-          setBakeRes({
-            acc: betWon / nbrBet * 100,
-            nbrBet: nbrBet,
-            nbrWon: betWon
-          })
-          await new Promise(r => setTimeout(r, 0));
-        }
-      }
-      testCursor.current = res.cursorRes + 1;
-    }
-  }
-
-  const checkNext = () => {
-    const res = search(testCursor.current);
-    const perc = engine.current!.funcs.getPercents(res.cursorRes - 50, res.cursorRes);
-    const resBrain = net.run((perc.situationResult as any))
-    printGraph(testCursor.current - 50, testCursor.current);
-    console.log(resBrain);
-    testCursor.current = res.cursorRes + 1;
-    // testCursor.current += 1;
-  }
-
-  const searchLot = async () => {
-    let cursor = MIN_CURSOR;
-    const final = [];
-
-    const trainingData: any[] = [];
-
-    // for (let i = 0; cursor < 4048620; i++) {
-    let nbrTrain = 0;
-    for (let i = 0; nbrTrain < 100; i++) {
-      const res = search(cursor);
-      const perc = engine.current!.funcs.getPercents(res.cursorRes - 50, res.cursorRes);
-      const isWin = engine.current!.funcs.isWin(res.cursorRes);
-      nbrTrain += 1;
-      trainingData.push({
-        input: perc.situationResult,
-        output: { isWin: isWin }
-      })
-      cursor = res.cursorRes + 1;
-    }
-    console.log("training amount :", trainingData.length);
-    net.train(trainingData, {
-      logPeriod: 100,
-    });
-    const res = net.toJSON()
-    console.log(res);
-    testCursor.current = cursor;
-    // testCursor.current = MIN_CURSOR;
-    console.log("DONE");
-  }
-
-  useEffect(() => {
-    ; (async () => {
-      engine.current = await init();
-      setReady(true);
-    })()
-  }, [])
-
-  return <>
-    {ready && <div>
-      <button onClick={() => {
-        const res = search(cursorRef.current);
-        // const perc = engine.current!.funcs.getPercents(res.cursorRes);
-        const isWin = engine.current!.funcs.isWin(res.cursorRes);
-        cursorRef.current = res.cursorRes + 1;
-        printGraph(res.cursorRes - 50, res.cursorRes);
-        console.log(isWin);
-
-      }}>Search next</button>
-      <button onClick={searchLot}>train</button>
-      <button onClick={checkNext}>check next</button>
-      <button onClick={bake}>bake</button>
-      {graph1 && <Line data={graph1!}></Line>}
-      <div style={{ fontSize: "2rem" }}>
-        Nbr bet : {bakeRes.nbrBet} <br />
-        Nbr won : {bakeRes.nbrWon} <br />
-        <span style={{ fontSize: "3rem" }}>Accuracy : {bakeRes.acc}% <br /></span>
-      </div>
-
-    </div>}
-  </>
-}
-
-// export default App;
 
 function App() {
   const initialState = {
@@ -190,6 +40,11 @@ function App() {
       nbrBet: 0,
       nbrWon: 0,
       ratio: 0,
+    },
+    nextCheck: {
+      bet: false,
+      percent: 0,
+      won: false,
     }
   }
 
@@ -236,27 +91,48 @@ function App() {
 
   }
 
+  const simulateNext = () => {
+    const res = engine.current!.funcs.searchPump(stateRef.current.cursor);
+    const perc = engine.current!.funcs.getPercents(res.cursorRes - 50, res.cursorRes);
+    const resBrain = net.run((Array.from(perc.situationResult) as any)) as any
+    stateRef.current.nextCheck.bet = false;
+    stateRef.current.nextCheck.percent = resBrain.isWin;
+
+    if (resBrain.isWin > 0.98) {
+      stateRef.current.nextCheck.bet = true;
+      const isWin = engine.current!.funcs.isWin(stateRef.current.cursor)
+      stateRef.current.nextCheck.won = isWin === 1 ? true : false;
+      stateRef.current.trainRes.nbrBet += 1;
+      if (isWin) {
+        stateRef.current.trainRes.nbrWon += 1;
+      }
+      stateRef.current.trainRes.ratio = stateRef.current.trainRes.nbrWon / stateRef.current.trainRes.nbrBet * 100;
+    }
+    stateRef.current.cursor = res.cursorRes + 1;
+  }
+
   const simulate = async () => {
     let i = 0;
     while (stateRef.current.cursor < 4060000) {
       i += 1;
-      const res = engine.current!.funcs.searchPump(stateRef.current.cursor);
-      const perc = engine.current!.funcs.getPercents(res.cursorRes - 50, res.cursorRes);
-      const resBrain = net.run((Array.from(perc.situationResult) as any)) as any
-      if (resBrain.isWin > 0.7) {
-        const isWin = engine.current!.funcs.isWin(stateRef.current.cursor)
-        stateRef.current.trainRes.nbrBet += 1;
-        if (isWin) {
-          stateRef.current.trainRes.nbrWon += 1;
-        }
-        stateRef.current.trainRes.ratio = stateRef.current.trainRes.nbrWon / stateRef.current.trainRes.nbrBet * 100;
-        if (i % 20 === 0) {
-          updateState(stateRef.current);
-          printGraph();
-          await new Promise(r => setTimeout(r, 0));
-        }
+      // const res = engine.current!.funcs.searchPump(stateRef.current.cursor);
+      // const perc = engine.current!.funcs.getPercents(res.cursorRes - 50, res.cursorRes);
+      // const resBrain = net.run((Array.from(perc.situationResult) as any)) as any
+      // if (resBrain.isWin > 0.98) {
+      //   const isWin = engine.current!.funcs.isWin(stateRef.current.cursor)
+      //   stateRef.current.trainRes.nbrBet += 1;
+      //   if (isWin) {
+      //     stateRef.current.trainRes.nbrWon += 1;
+      //   }
+      //   stateRef.current.trainRes.ratio = stateRef.current.trainRes.nbrWon / stateRef.current.trainRes.nbrBet * 100;
+      // }
+      simulateNext();
+      if (i % 20 === 0) {
+        updateState(stateRef.current);
+        printGraph();
+        await new Promise(r => setTimeout(r, 0));
       }
-      stateRef.current.cursor = res.cursorRes + 1;
+      // stateRef.current.cursor = res.cursorRes + 1;
     }
   }
 
@@ -278,7 +154,6 @@ function App() {
       updateState(stateRef.current);
       printGraph();
       stateRef.current.cursor = res.cursorRes + 1;
-      console.log(stateRef.current.cursor);
       await new Promise(r => setTimeout(r, 5));
     }
     await new Promise(r => setTimeout(r, 100));
@@ -339,6 +214,17 @@ function App() {
         ></input>
         {state.training && <div>training in progress.... </div>}<br /><br />
         {state.trained && <div>
+          <div>
+            <button onClick={() => {
+              simulateNext()
+              updateState(stateRef.current);
+              printGraph();
+            }}>Check next</button><br/>
+            Result : {stateRef.current.nextCheck.percent}<br />
+            bet : {stateRef.current.nextCheck.bet ? "yes" : "no"}<br />
+            won : {stateRef.current.nextCheck.won ? "yes" : "no"}<br />
+            <br/>
+          </div>
           <button onClick={simulate}>simulate trained from here</button><br />
           nbrBet : {state.trainRes.nbrBet}<br />
           nbrWon : {state.trainRes.nbrWon}<br />

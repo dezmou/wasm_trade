@@ -183,6 +183,9 @@ function App() {
     cursor: 5000,
     graph1: { labels: [], datasets: [] } as lineProps["data"],
     lineString: ``,
+    nbrPumpTrain: 10,
+    trained: false,
+    training: false,
   }
 
   const engine = useRef<Awaited<ReturnType<typeof init>> | null>(null)
@@ -192,7 +195,7 @@ function App() {
 
   const updateState = (state: typeof initialState) => {
     stateRef.current = state;
-    setState(state);
+    setState({ ...state });
   }
 
   const printGraph = () => {
@@ -226,6 +229,37 @@ function App() {
       }
     })
 
+  }
+
+  const train = async () => {
+    const final = [];
+
+    const trainingData: any[] = [];
+    updateState({ ...stateRef.current, training: true })
+    let nbrTrain = 0;
+    for (let i = 0; nbrTrain < stateRef.current.nbrPumpTrain; i++) {
+      const res = engine.current!.funcs.searchPump(stateRef.current.cursor);
+      const perc = engine.current!.funcs.getPercents(res.cursorRes - 50, res.cursorRes);
+      const isWin = engine.current!.funcs.isWin(res.cursorRes);
+      nbrTrain += 1;
+      trainingData.push({
+        input: perc.situationResult,
+        output: { isWin: isWin }
+      })
+      updateState(stateRef.current);
+      printGraph();
+      stateRef.current.cursor = res.cursorRes + 1;
+      console.log(stateRef.current.cursor);
+      await new Promise(r => setTimeout(r, 5));
+    }
+    net.train(trainingData, {
+      logPeriod: 500,
+    });
+    stateRef.current.trained = true;
+    updateState(stateRef.current);
+    const res = net.toJSON()
+    updateState({ ...stateRef.current, training: false, trained: true })
+    console.log(res);
   }
 
   useEffect(() => {
@@ -263,14 +297,22 @@ function App() {
         <button onMouseDown={() => forward.current = 1} onMouseUp={() => forward.current = 0}>+</button>
         <button onClick={() => {
           const res = engine.current!.funcs.searchPump(stateRef.current.cursor + 1);
-          updateState({...stateRef.current!, cursor : res.cursorRes});
+          updateState({ ...stateRef.current!, cursor: res.cursorRes });
           printGraph()
 
-        }}>find next Pump</button>
+        }}>find next pump</button><br /><br />
+        <button onClick={train}>Train from here</button><br />
+        nbr pump : <input type="number" value={state.nbrPumpTrain}
+          onChange={(e) => {
+            updateState(({ ...stateRef.current, nbrPumpTrain: parseInt(e.target.value) }))
+          }}
+        ></input>
+        {state.training && <div>training in progress....</div>}
 
       </div>
 
-    </>}
+    </>
+    }
   </>
 }
 

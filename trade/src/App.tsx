@@ -28,7 +28,7 @@ const net = new NeuralNetwork({
 // const net = new NeuralNetworkGPU();
 
 
-function App() {
+function AppOld() {
   const [ready, setReady] = useState(false);
   const [graph1, setGraph1] = useState<lineProps["data"] | null>(null)
   const engine = useRef<Awaited<ReturnType<typeof init>> | null>(null)
@@ -174,4 +174,78 @@ function App() {
   </>
 }
 
-export default App;
+// export default App;
+
+function App() {
+  const engine = useRef<Awaited<ReturnType<typeof init>> | null>(null)
+  const [state, setState] = useState({
+    ready: false,
+    cursor: 5000,
+    graph1: { labels: [], datasets: [] } as lineProps["data"],
+  })
+
+  const printGraph = (cursor: number) => {
+    const startCursor = cursor - 50;
+    const perc = engine.current!.funcs.getPercents(startCursor, cursor + 100);
+
+    const final: number[] = [];
+    const bg: string[] = [];
+
+    for (let i = 0; i < 100; i++) {
+      final.push(perc.situationResult.at(i)! / 100)
+      if (i < 50) {
+        bg.push("red")
+      } else {
+        bg.push("blue");
+      }
+    }
+
+    setState(e => ({
+      ...e,
+      graph1: {
+        labels: final,
+        datasets: [
+          {
+            label: "close",
+            data: final,
+            // fill: true,
+            backgroundColor: bg,
+            borderColor: bg,
+            animation: false
+          },
+        ]
+      }
+    }))
+
+  }
+
+  useEffect(() => {
+    ; (async () => {
+      engine.current = await init();
+      setState({ ...state, ready: true });
+      printGraph(state.cursor)
+      console.log("DONE");
+    })()
+  }, [])
+
+  return <>
+    {state.ready && <>
+      <div>
+        {state.graph1.datasets.length > 0 && <>
+          <Line data={state.graph1!}></Line>
+        </>}
+        {state.cursor}
+        <input type="range" value={state.cursor} onChange={(e) => {
+          setState({ ...state, cursor: parseInt(e.target.value) })
+          printGraph(state.cursor)
+        }} min={5000} max={4000000} style={{
+          width: "90vw",
+        }}></input>
+
+      </div>
+
+    </>}
+  </>
+}
+
+export default App

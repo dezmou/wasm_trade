@@ -200,13 +200,15 @@ function App() {
     const final: number[] = [];
     const bg: string[] = [];
 
+    let chienCursor = startCursor;
     for (let i = 0; i < 100; i++) {
       final.push(perc.situationResult.at(i)! / 100)
-      if (i < 50) {
+      if (chienCursor <= cursor) {
         bg.push("red")
       } else {
         bg.push("blue");
       }
+      chienCursor += 1;
     }
 
     updateState({
@@ -217,7 +219,7 @@ function App() {
           {
             label: "close",
             data: final,
-            // fill: true,
+            fill: true,
             backgroundColor: bg,
             borderColor: bg,
             animation: false
@@ -228,21 +230,20 @@ function App() {
 
   }
 
-  const onFrame = () => {
-    if (forward.current !== 0) {
-      updateState({...stateRef.current, cursor : stateRef.current.cursor + forward.current});
-      printGraph(stateRef.current.cursor);
-    }
-    requestAnimationFrame(onFrame);
-  }
-
   useEffect(() => {
     ; (async () => {
       engine.current = await init();
-      updateState({...stateRef.current, ready : true});
+      updateState({ ...stateRef.current, ready: true });
       printGraph(state.cursor)
-      onFrame();
       console.log("READY");
+      while (true) {
+        if (forward.current !== 0) {
+          updateState({ ...stateRef.current, cursor: stateRef.current.cursor + forward.current });
+          printGraph(stateRef.current.cursor);
+        }
+        await new Promise(r => requestAnimationFrame(r));
+        await new Promise(r => requestAnimationFrame(r));
+      }
     })()
   }, [])
 

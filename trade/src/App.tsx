@@ -6,6 +6,7 @@ import {
 import React, { useEffect, useRef, useState } from 'react';
 import { Line } from 'react-chartjs-2';
 import { init, MIN_CURSOR } from "./engine";
+import moment from "moment"
 
 ChartJS.register(
   CategoryScale,
@@ -181,6 +182,7 @@ function App() {
     ready: false,
     cursor: 5000,
     graph1: { labels: [], datasets: [] } as lineProps["data"],
+    lineString: ``,
   }
 
   const engine = useRef<Awaited<ReturnType<typeof init>> | null>(null)
@@ -193,9 +195,10 @@ function App() {
     setState(state);
   }
 
-  const printGraph = (cursor: number) => {
-    const startCursor = cursor - 50;
-    const perc = engine.current!.funcs.getPercents(startCursor, cursor + 100);
+  const printGraph = () => {
+    const startCursor = stateRef.current.cursor - 50;
+    const perc = engine.current!.funcs.getPercents(startCursor, stateRef.current.cursor + 100);
+    const line = engine.current!.getLine(stateRef.current.cursor)
 
     const final: number[] = [];
     for (let i = 0; i < 100; i++) {
@@ -204,6 +207,7 @@ function App() {
 
     updateState({
       ...stateRef.current,
+      lineString: `${moment.unix(line.time).format()}`,
       graph1: {
         labels: final,
         datasets: [
@@ -214,7 +218,7 @@ function App() {
             animation: false,
             segment: {
               borderColor: ctx => {
-                return ctx.p0DataIndex + startCursor <= cursor ? "red" : "blue"
+                return ctx.p0DataIndex + startCursor <= stateRef.current.cursor ? "red" : "blue"
               }
             }
           },
@@ -228,12 +232,12 @@ function App() {
     ; (async () => {
       engine.current = await init();
       updateState({ ...stateRef.current, ready: true });
-      printGraph(state.cursor)
+      printGraph()
       console.log("READY");
       while (true) {
         if (forward.current !== 0) {
           updateState({ ...stateRef.current, cursor: stateRef.current.cursor + forward.current });
-          printGraph(stateRef.current.cursor);
+          printGraph();
         }
         await new Promise(r => requestAnimationFrame(r));
         await new Promise(r => requestAnimationFrame(r));
@@ -247,15 +251,22 @@ function App() {
         {state.graph1.datasets.length > 0 && <>
           <Line data={state.graph1!}></Line>
         </>}
-        {state.cursor}
+        {state.cursor}<br />
+        {state.lineString}<br />
         <input type="range" value={state.cursor} onChange={(e) => {
-          updateState({ ...state, cursor: parseInt(e.target.value) })
-          printGraph(state.cursor)
+          updateState({ ...stateRef.current, cursor: parseInt(e.target.value) })
+          printGraph()
         }} min={5000} max={4000000} style={{
           width: "90vw",
         }}></input><br />
         <button onMouseDown={() => forward.current = -1} onMouseUp={() => forward.current = 0}>-</button>
         <button onMouseDown={() => forward.current = 1} onMouseUp={() => forward.current = 0}>+</button>
+        <button onClick={() => {
+          const res = engine.current!.funcs.searchPump(stateRef.current.cursor + 1);
+          updateState({...stateRef.current!, cursor : res.cursorRes});
+          printGraph()
+
+        }}>find next Pump</button>
 
       </div>
 

@@ -177,12 +177,21 @@ function AppOld() {
 // export default App;
 
 function App() {
-  const engine = useRef<Awaited<ReturnType<typeof init>> | null>(null)
-  const [state, setState] = useState({
+  const initialState = {
     ready: false,
     cursor: 5000,
     graph1: { labels: [], datasets: [] } as lineProps["data"],
-  })
+  }
+
+  const engine = useRef<Awaited<ReturnType<typeof init>> | null>(null)
+  const forward = useRef(0);
+  const [state, setState] = useState(initialState)
+  const stateRef = useRef(initialState);
+
+  const updateState = (state: typeof initialState) => {
+    stateRef.current = state;
+    setState(state);
+  }
 
   const printGraph = (cursor: number) => {
     const startCursor = cursor - 50;
@@ -200,8 +209,8 @@ function App() {
       }
     }
 
-    setState(e => ({
-      ...e,
+    updateState({
+      ...stateRef.current,
       graph1: {
         labels: final,
         datasets: [
@@ -215,16 +224,25 @@ function App() {
           },
         ]
       }
-    }))
+    })
 
+  }
+
+  const onFrame = () => {
+    if (forward.current !== 0) {
+      updateState({...stateRef.current, cursor : stateRef.current.cursor + forward.current});
+      printGraph(stateRef.current.cursor);
+    }
+    requestAnimationFrame(onFrame);
   }
 
   useEffect(() => {
     ; (async () => {
       engine.current = await init();
-      setState({ ...state, ready: true });
+      updateState({...stateRef.current, ready : true});
       printGraph(state.cursor)
-      console.log("DONE");
+      onFrame();
+      console.log("READY");
     })()
   }, [])
 
@@ -236,11 +254,13 @@ function App() {
         </>}
         {state.cursor}
         <input type="range" value={state.cursor} onChange={(e) => {
-          setState({ ...state, cursor: parseInt(e.target.value) })
+          updateState({ ...state, cursor: parseInt(e.target.value) })
           printGraph(state.cursor)
         }} min={5000} max={4000000} style={{
           width: "90vw",
-        }}></input>
+        }}></input><br />
+        <button onMouseDown={() => forward.current = -1} onMouseUp={() => forward.current = 0}>-</button>
+        <button onMouseDown={() => forward.current = 1} onMouseUp={() => forward.current = 0}>+</button>
 
       </div>
 

@@ -219,13 +219,13 @@ function App() {
               simulateNext()
               updateState(stateRef.current);
               printGraph();
-            }}>Check next</button><br/>
+            }}>Check next pump</button><br/>
             Result : {stateRef.current.nextCheck.percent}<br />
             bet : {stateRef.current.nextCheck.bet ? "yes" : "no"}<br />
             won : {stateRef.current.nextCheck.won ? "yes" : "no"}<br />
             <br/>
           </div>
-          <button onClick={simulate}>simulate trained from here</button><br />
+          <button onClick={simulate}>Check all remaining</button><br />
           nbrBet : {state.trainRes.nbrBet}<br />
           nbrWon : {state.trainRes.nbrWon}<br />
           <strong>ratio : {state.trainRes.ratio}</strong><br />

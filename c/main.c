@@ -18,8 +18,8 @@ typedef struct  misc {
 
 #define WIN_CHANGE 20
 #define LOST_CHANGE 20
-#define IS_PUMP 100
-#define PUMP_BACK_MINUTE 3
+#define IS_PUMP 50
+#define PUMP_BACK_MINUTE 2
 
 // void getPumpData(Data *data, Result *res, Misc * misc, int cursor){
 

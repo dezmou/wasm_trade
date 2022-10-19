@@ -24,14 +24,14 @@ const net = new NeuralNetwork({
   log: (e) => {
     console.log(e);
   },
-  hiddenLayers: [50,50,50],
+  hiddenLayers: [8],
 });
 
 function App() {
   const initialState = {
     ready: false,
     cursor: 5000,
-    graph1: { labels: [], datasets: [] } as lineProps["data"],
+    graph1: { datasets: [] } as lineProps["data"],
     lineString: ``,
     nbrPumpTrain: 10,
     trained: false,
@@ -47,6 +47,7 @@ function App() {
       won: false,
     }
   }
+  const [graph2, setGraph2] = useState({ datasets: [] } as lineProps["data"]);
 
   const engine = useRef<Awaited<ReturnType<typeof init>> | null>(null)
   const forward = useRef(0);
@@ -98,7 +99,7 @@ function App() {
     stateRef.current.nextCheck.bet = false;
     stateRef.current.nextCheck.percent = resBrain.isWin;
 
-    if (resBrain.isWin > 0.6) {
+    if (resBrain.isWin > 0.7) {
       stateRef.current.nextCheck.bet = true;
       const isWin = engine.current!.funcs.isWin(stateRef.current.cursor)
       stateRef.current.nextCheck.won = isWin === 1 ? true : false;
@@ -149,10 +150,11 @@ function App() {
       })
       updateState(stateRef.current);
       printGraph();
-      stateRef.current.cursor = res.cursorRes + 1;
+      // stateRef.current.cursor = res.cursorRes + 1;
+      stateRef.current.cursor = Math.floor(Math.random() * 3000000);
       await new Promise(r => setTimeout(r, 5));
     }
-    await new Promise(r => setTimeout(r, 100));
+    await new Promise(r => setTimeout(r, 400));
     net.train(trainingData, {
       logPeriod: 500,
     });
@@ -163,19 +165,39 @@ function App() {
     console.log(res);
   }
 
+  const getTotalGraph = () => {
+    const final: number[] = []
+    for (let i = 0; i < 4000000; i += 8000) {
+      final.push(engine.current!.getLine(i).close);
+    }
+    return final;
+  }
+
   useEffect(() => {
     ; (async () => {
       engine.current = await init();
       updateState({ ...stateRef.current, ready: true });
       printGraph()
       console.log("READY");
+      const totalGraph = getTotalGraph();
+      setGraph2({
+        labels: totalGraph,
+        datasets: [
+          {
+            label: "btc price",
+            data: totalGraph,
+            fill: true,
+            animation: false,
+          },
+        ]
+      })
       while (true) {
         if (forward.current !== 0) {
-          updateState({ ...stateRef.current, cursor: stateRef.current.cursor + forward.current });
+          updateState({ ...stateRef.current, cursor: stateRef.current.cursor + forward.current * 3 });
           printGraph();
         }
         await new Promise(r => requestAnimationFrame(r));
-        await new Promise(r => requestAnimationFrame(r));
+        // await new Promise(r => requestAnimationFrame(r));
       }
     })()
   }, [])
@@ -184,7 +206,18 @@ function App() {
     {state.ready && <>
       <div>
         {state.graph1.datasets.length > 0 && <>
-          <Line data={state.graph1!}></Line>
+          <div style={{
+            height: "400px",
+            width: "90vw",
+          }}>
+            <Line data={state.graph1!} options={{ maintainAspectRatio: false }}></Line>
+          </div>
+          <div style={{
+            height: "400px",
+            width: "90vw",
+          }}>
+            {/* <Line data={graph2!} options={{ maintainAspectRatio: false }}></Line> */}
+          </div>
         </>}
         {state.cursor}<br />
         {state.lineString}<br />

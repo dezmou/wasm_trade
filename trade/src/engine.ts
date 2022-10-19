@@ -2,6 +2,7 @@ export const LINE_SIZE = 6;
 export const SITUATION_SIZE = 100;
 export const MIN_CURSOR = 1_000_000
 
+
 const SIZE_INT = 4
 
 interface Abi {
